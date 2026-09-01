@@ -4,16 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { COMPANY_INFO } from '@/lib/constants';
 import { 
-  Shield, 
   Mail, 
   MapPin, 
   FileBadge, 
   ArrowUp, 
   MessageSquare,
   MessageCircle,
-  Github,
   Linkedin,
-  Twitter
+  Instagram,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Footer() {
@@ -54,33 +53,25 @@ export default function Footer() {
               <span>MSME Udyam: <strong className="text-white font-mono">{COMPANY_INFO.udyamRegNo}</strong></span>
             </div>
 
+            {/* Social Media Links (Instagram & LinkedIn only) */}
             <div className="flex items-center gap-3 mt-2">
               <a
-                href="https://linkedin.com"
+                href={COMPANY_INFO.instagramUrl || 'https://www.instagram.com/zetavextech'}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-9 h-9 rounded-xl bg-[#292524] hover:bg-gradient-to-tr hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF] flex items-center justify-center text-[#A8A29E] hover:text-white transition-all shadow-sm"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a
+                href={COMPANY_INFO.linkedinUrl || 'https://www.linkedin.com/company/zetavex-tech-solutions'}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="w-8 h-8 rounded-lg bg-[#292524] hover:bg-[#FF5500] flex items-center justify-center text-[#A8A29E] hover:text-white transition-colors"
+                className="w-9 h-9 rounded-xl bg-[#292524] hover:bg-[#0077B5] flex items-center justify-center text-[#A8A29E] hover:text-white transition-all shadow-sm"
               >
                 <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="w-8 h-8 rounded-lg bg-[#292524] hover:bg-[#FF5500] flex items-center justify-center text-[#A8A29E] hover:text-white transition-colors"
-              >
-                <Github className="w-4 h-4" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Twitter"
-                className="w-8 h-8 rounded-lg bg-[#292524] hover:bg-[#FF5500] flex items-center justify-center text-[#A8A29E] hover:text-white transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
               </a>
             </div>
           </div>
@@ -92,22 +83,22 @@ export default function Footer() {
             </h3>
             <ul className="flex flex-col gap-2.5 text-sm text-[#DCD8CF]">
               <li>
-                <a href="#" className="hover:text-[#FF5500] transition-colors">Home</a>
+                <Link href="/" className="hover:text-[#FF5500] transition-colors">Home</Link>
               </li>
               <li>
-                <a href="#services" className="hover:text-[#FF5500] transition-colors">Services</a>
+                <Link href="/services" className="hover:text-[#FF5500] transition-colors">Services</Link>
               </li>
               <li>
-                <a href="#projects" className="hover:text-[#FF5500] transition-colors">Portfolio</a>
+                <Link href="/projects" className="hover:text-[#FF5500] transition-colors">Portfolio</Link>
               </li>
               <li>
-                <a href="#team" className="hover:text-[#FF5500] transition-colors">Leadership</a>
+                <Link href="/team" className="hover:text-[#FF5500] transition-colors">Leadership &amp; Team</Link>
               </li>
               <li>
-                <a href="#reviews" className="hover:text-[#FF5500] transition-colors">Client Reviews</a>
+                <Link href="/#reviews" className="hover:text-[#FF5500] transition-colors">Client Reviews</Link>
               </li>
               <li>
-                <a href="#contact" className="hover:text-[#FF5500] transition-colors">Contact Us</a>
+                <Link href="/#contact" className="hover:text-[#FF5500] transition-colors">Contact Us</Link>
               </li>
             </ul>
           </div>
@@ -119,24 +110,24 @@ export default function Footer() {
             </h3>
             <ul className="flex flex-col gap-2.5 text-sm text-[#DCD8CF]">
               <li>
-                <a href="#services" className="hover:text-[#FF5500] transition-colors">Full-Stack Development</a>
+                <Link href="/services/full-stack-web-dev" className="hover:text-[#FF5500] transition-colors">Full-Stack Development</Link>
               </li>
               <li>
-                <a href="#services" className="hover:text-[#FF5500] transition-colors">SaaS Architectures</a>
+                <Link href="/services/custom-saas-development" className="hover:text-[#FF5500] transition-colors">SaaS Architectures</Link>
               </li>
               <li>
-                <a href="#services" className="hover:text-[#FF5500] transition-colors">Mobile App Systems</a>
+                <Link href="/services/mobile-app-solutions" className="hover:text-[#FF5500] transition-colors">Mobile App Systems</Link>
               </li>
               <li>
-                <a href="#services" className="hover:text-[#FF5500] transition-colors">DevOps &amp; Cloud</a>
+                <Link href="/services/cloud-infrastructure-devops" className="hover:text-[#FF5500] transition-colors">DevOps &amp; Cloud</Link>
               </li>
               <li>
-                <a href="#services" className="hover:text-[#FF5500] transition-colors">UI/UX Design Systems</a>
+                <Link href="/services/ui-ux-product-design" className="hover:text-[#FF5500] transition-colors">UI/UX Design Systems</Link>
               </li>
             </ul>
           </div>
 
-          {/* Direct Contact & Admin */}
+          {/* Direct Contact & Legal */}
           <div>
             <h3 className="text-xs font-bold tracking-widest text-[#A8A29E] uppercase mb-4">
               Connect Directly
@@ -162,13 +153,13 @@ export default function Footer() {
                 <MapPin className="w-4 h-4 text-[#FF5500] shrink-0" />
                 <span>{COMPANY_INFO.address}</span>
               </div>
-              <div className="pt-2">
-                <Link
-                  href="/admin/login"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-xs font-semibold text-[#EBE8E1] transition-colors border border-[#44403C]"
-                >
-                  <Shield className="w-3.5 h-3.5 text-[#FF5500]" />
-                  <span>Admin Management Portal</span>
+
+              <div className="pt-2 flex flex-col gap-1.5 text-xs text-[#A8A29E]">
+                <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms-and-conditions" className="hover:text-white transition-colors">
+                  Terms &amp; Conditions
                 </Link>
               </div>
             </div>
@@ -177,9 +168,18 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#78716C]">
-          <div>
-            © {new Date().getFullYear()} ZetaVex Tech Solutions. All rights reserved. Founded &amp; Engineered by {COMPANY_INFO.founder}.
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>© {new Date().getFullYear()} ZetaVex Tech Solutions. All rights reserved. Founded &amp; Engineered by {COMPANY_INFO.founder}.</span>
+            <span className="hidden sm:inline text-[#44403C]">|</span>
+            <Link href="/privacy-policy" className="hover:text-[#DCD8CF] transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="hidden sm:inline text-[#44403C]">·</span>
+            <Link href="/terms-and-conditions" className="hover:text-[#DCD8CF] transition-colors">
+              Terms &amp; Conditions
+            </Link>
           </div>
+
           <div className="flex items-center gap-6">
             <span className="text-[#A8A29E]">Slogan: &ldquo;{COMPANY_INFO.slogan}&rdquo;</span>
             <button

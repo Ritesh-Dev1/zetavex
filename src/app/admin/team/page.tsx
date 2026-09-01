@@ -10,12 +10,14 @@ import {
   CheckCircle2, 
   AlertCircle,
   Linkedin,
-  MessageCircle
+  MessageCircle,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminTeamPage() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -31,7 +33,6 @@ export default function AdminTeamPage() {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
   const fetchTeam = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/admin/team');
       const data = await res.json();
@@ -80,9 +81,23 @@ export default function AdminTeamPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
 
     try {
       if (editingMember) {
+        // Optimistic UI update
+        setTeam(prev => prev.map(m => m.id === editingMember.id ? {
+          ...m,
+          name,
+          role,
+          bio,
+          photo_url: photoUrl,
+          whatsapp_number: whatsappNumber,
+          linkedin_url: linkedinUrl,
+          sort_order: Number(sortOrder),
+          status,
+        } : m));
+
         const res = await fetch('/api/admin/team', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -123,18 +138,25 @@ export default function AdminTeamPage() {
       fetchTeam();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchTeam();
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this team member?')) return;
+    
+    // Instant Optimistic delete
+    setTeam(prev => prev.filter(m => m.id !== id));
+    showNotification('success', 'Team member removed.');
+
     try {
       const res = await fetch(`/api/admin/team?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      showNotification('success', 'Team member removed.');
-      fetchTeam();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchTeam();
     }
   };
 
@@ -153,7 +175,7 @@ export default function AdminTeamPage() {
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Add Member</span>
@@ -177,10 +199,21 @@ export default function AdminTeamPage() {
         </div>
       )}
 
-      {/* Team Cards */}
+      {/* Team Cards with Skeleton Loader */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-xs text-[#78716C]">Loading team...</div>
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-[#1C1917] rounded-3xl border border-[#292524] p-6 flex flex-col gap-4 animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#292524] shrink-0" />
+                <div className="flex flex-col gap-2 w-full">
+                  <div className="h-5 bg-[#292524] rounded w-3/4" />
+                  <div className="h-3 bg-[#292524] rounded w-1/2" />
+                </div>
+              </div>
+              <div className="h-12 bg-[#292524] rounded w-full" />
+            </div>
+          ))
         ) : team.length === 0 ? (
           <div className="col-span-full py-12 text-center text-xs text-[#78716C]">No team members found.</div>
         ) : (
@@ -239,14 +272,14 @@ export default function AdminTeamPage() {
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleOpenEdit(m)}
-                    className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF]"
+                    className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF] active:scale-95"
                     title="Edit Member"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(m.id)}
-                    className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300"
+                    className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300 active:scale-95"
                     title="Delete Member"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -392,9 +425,17 @@ export default function AdminTeamPage() {
               <div className="flex items-center gap-3 pt-4 border-t border-[#292524] mt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md"
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md disabled:opacity-50"
                 >
-                  {editingMember ? 'Save Updates' : 'Add Member'}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>{editingMember ? 'Save Updates' : 'Add Member'}</span>
+                  )}
                 </button>
                 <button
                   type="button"

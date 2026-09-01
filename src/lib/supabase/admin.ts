@@ -71,16 +71,26 @@ class MemoryStore {
     reset_token_expires_at?: string;
     created_at: string;
     last_login_at?: string;
-  }> = [
-    {
-      id: 'admin-1',
-      email: 'admin@zetavextech.com',
-      password_hash: hashPassword('ZetaVex@2026!'),
-      role: 'super_admin',
-      status: 'active',
-      created_at: new Date().toISOString(),
+  }> = (() => {
+    const envEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_INITIAL_EMAIL;
+    const envPass = process.env.ADMIN_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD;
+    const envHash = process.env.ADMIN_PASSWORD_HASH;
+
+    if (envEmail && (envPass || envHash)) {
+      return [
+        {
+          id: 'admin-env-1',
+          email: envEmail.toLowerCase().trim(),
+          password_hash: envHash || hashPassword(envPass || ''),
+          role: 'super_admin',
+          status: 'active',
+          created_at: new Date().toISOString(),
+        }
+      ];
     }
-  ];
+    // No hardcoded default credentials
+    return [];
+  })();
 }
 
 // Global singleton to prevent reset across API calls in same Node process
@@ -673,6 +683,14 @@ export async function getAdminByResetToken(tokenHash: string) {
   return localDb.adminUsers.find(u => u.reset_token_hash === tokenHash) || null;
 }
 
+// Check if admin is configured in environment (.env)
+export function isAdminConfiguredInEnv(): boolean {
+  const envEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_INITIAL_EMAIL;
+  const envPass = process.env.ADMIN_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD;
+  const envHash = process.env.ADMIN_PASSWORD_HASH;
+  return Boolean(envEmail && (envPass || envHash));
+}
+
 // 1-Click Database Seeder / Syncer
 export async function seedDatabase() {
   if (!supabaseAdmin) {
@@ -682,16 +700,22 @@ export async function seedDatabase() {
   const results: Record<string, any> = {};
 
   try {
-    // 1. Admin User
-    const adminEmail = process.env.ADMIN_INITIAL_EMAIL || 'admin@zetavextech.com';
-    const adminPass = process.env.ADMIN_INITIAL_PASSWORD || 'ZetaVex@2026!';
-    const { error: adminErr } = await supabaseAdmin.from('admin_users').upsert({
-      email: adminEmail,
-      password_hash: hashPassword(adminPass),
-      role: 'super_admin',
-      status: 'active',
-    }, { onConflict: 'email' });
-    results.admin = adminErr ? adminErr.message : 'seeded';
+    // 1. Admin User (Only if configured in environment)
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_INITIAL_EMAIL;
+    const adminPass = process.env.ADMIN_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD;
+    const adminHash = process.env.ADMIN_PASSWORD_HASH;
+
+    if (adminEmail && (adminPass || adminHash)) {
+      const { error: adminErr } = await supabaseAdmin.from('admin_users').upsert({
+        email: adminEmail.toLowerCase().trim(),
+        password_hash: adminHash || hashPassword(adminPass || ''),
+        role: 'super_admin',
+        status: 'active',
+      }, { onConflict: 'email' });
+      results.admin = adminErr ? adminErr.message : 'seeded from .env';
+    } else {
+      results.admin = 'skipped (no ADMIN_EMAIL and ADMIN_PASSWORD configured in .env)';
+    }
 
     // 2. Services
     for (const service of INITIAL_SERVICES) {

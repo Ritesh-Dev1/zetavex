@@ -30,7 +30,6 @@ export default function AdminDashboardPage() {
   const [syncing, setSyncing] = useState(false);
 
   const fetchDashboardData = async () => {
-    setLoading(true);
     try {
       const [sRes, pRes, tRes, rRes, eRes] = await Promise.all([
         fetch('/api/admin/services'),
@@ -66,7 +65,7 @@ export default function AdminDashboardPage() {
 
   const handleSyncDatabase = async () => {
     setSyncing(true);
-    setSyncStatus(null);
+    setSyncStatus('Syncing remote Supabase catalog...');
     try {
       const res = await fetch('/api/admin/seed', { method: 'POST' });
       const data = await res.json();
@@ -104,7 +103,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={handleSyncDatabase}
             disabled={syncing}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             <span>{syncing ? 'Syncing...' : 'Sync Remote DB'}</span>
@@ -127,99 +126,110 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Metrics Grid */}
+      {/* Metrics Grid with Skeleton Loader */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Services */}
-        <Link
-          href="/admin/services"
-          className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Services</span>
-            <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
-              <Layers className="w-4 h-4" />
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] flex flex-col justify-between h-28 animate-pulse">
+              <div className="w-16 h-3 bg-[#292524] rounded" />
+              <div className="w-10 h-7 bg-[#292524] rounded" />
             </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-3xl font-black text-white">{services.length}</span>
-            <span className="text-[11px] text-[#A8A29E] block mt-1">Catalog items</span>
-          </div>
-        </Link>
+          ))
+        ) : (
+          <>
+            {/* Services */}
+            <Link
+              href="/admin/services"
+              className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Services</span>
+                <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
+                  <Layers className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <span className="text-3xl font-black text-white">{services.length}</span>
+                <span className="text-[11px] text-[#A8A29E] block mt-1">Catalog items</span>
+              </div>
+            </Link>
 
-        {/* Projects */}
-        <Link
-          href="/admin/projects"
-          className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Projects</span>
-            <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
-              <Briefcase className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-3xl font-black text-white">{projects.length}</span>
-            <span className="text-[11px] text-[#A8A29E] block mt-1">Case studies</span>
-          </div>
-        </Link>
+            {/* Projects */}
+            <Link
+              href="/admin/projects"
+              className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Projects</span>
+                <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
+                  <Briefcase className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <span className="text-3xl font-black text-white">{projects.length}</span>
+                <span className="text-[11px] text-[#A8A29E] block mt-1">Case studies</span>
+              </div>
+            </Link>
 
-        {/* Team */}
-        <Link
-          href="/admin/team"
-          className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Team</span>
-            <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
-              <Users className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-3xl font-black text-white">{team.length}</span>
-            <span className="text-[11px] text-[#A8A29E] block mt-1">Active leadership</span>
-          </div>
-        </Link>
+            {/* Team */}
+            <Link
+              href="/admin/team"
+              className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Team</span>
+                <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
+                  <Users className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <span className="text-3xl font-black text-white">{team.length}</span>
+                <span className="text-[11px] text-[#A8A29E] block mt-1">Active leadership</span>
+              </div>
+            </Link>
 
-        {/* Reviews */}
-        <Link
-          href="/admin/reviews"
-          className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Reviews</span>
-            <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
-              <Star className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-3xl font-black text-white">{reviews.length}</span>
-            <span className="text-[11px] text-[#A8A29E] block mt-1">Client ratings</span>
-          </div>
-        </Link>
+            {/* Reviews */}
+            <Link
+              href="/admin/reviews"
+              className="bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Reviews</span>
+                <div className="w-8 h-8 rounded-lg bg-[#FF5500]/10 flex items-center justify-center text-[#FF5500] group-hover:scale-110 transition-transform">
+                  <Star className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <span className="text-3xl font-black text-white">{reviews.length}</span>
+                <span className="text-[11px] text-[#A8A29E] block mt-1">Client ratings</span>
+              </div>
+            </Link>
 
-        {/* Enquiries */}
-        <Link
-          href="/admin/enquiries"
-          className="col-span-2 sm:col-span-1 bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Enquiries</span>
-            <div className="w-8 h-8 rounded-lg bg-[#10B981]/10 flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform">
-              <Mail className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-white">{enquiries.length}</span>
-              {newEnquiriesCount > 0 && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#FF5500] text-white">
-                  {newEnquiriesCount} new
-                </span>
-              )}
-            </div>
-            <span className="text-[11px] text-[#A8A29E] block mt-1">Form leads</span>
-          </div>
-        </Link>
+            {/* Enquiries */}
+            <Link
+              href="/admin/enquiries"
+              className="col-span-2 sm:col-span-1 bg-[#1C1917] p-5 rounded-2xl border border-[#292524] hover:border-[#FF5500]/50 transition-all group flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Enquiries</span>
+                <div className="w-8 h-8 rounded-lg bg-[#10B981]/10 flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform">
+                  <Mail className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-white">{enquiries.length}</span>
+                  {newEnquiriesCount > 0 && (
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#FF5500] text-white">
+                      {newEnquiriesCount} new
+                    </span>
+                  )}
+                </div>
+                <span className="text-[11px] text-[#A8A29E] block mt-1">Form leads</span>
+              </div>
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Recent Enquiries & Quick Actions */}
@@ -241,7 +251,11 @@ export default function AdminDashboardPage() {
           </div>
 
           {loading ? (
-            <div className="py-8 text-center text-xs text-[#78716C]">Loading records...</div>
+            <div className="flex flex-col gap-3 animate-pulse">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-16 bg-[#0C0A09] rounded-2xl border border-[#292524]" />
+              ))}
+            </div>
           ) : enquiries.length === 0 ? (
             <div className="py-8 text-center text-xs text-[#78716C]">No enquiries received yet.</div>
           ) : (
@@ -276,19 +290,19 @@ export default function AdminDashboardPage() {
                         href={`https://wa.me/${enq.phone.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(enq.name)}%2C%20this%20is%20Vivek%20from%20ZetaVex%20Tech%20Solutions.`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-2.5 py-1.5 rounded-lg bg-[#25D366] text-white text-xs font-bold hover:opacity-90 flex items-center gap-1"
+                        className="px-2.5 py-1.5 rounded-lg bg-[#25D366] text-white text-xs font-bold hover:opacity-90 flex items-center gap-1 active:scale-95"
                         title="WhatsApp Reply"
                       >
-                        <MessageSquare className="w-3 h-3 fill-white" />
+                        <MessageSquare className="w-3.5 h-3.5 fill-white" />
                         <span>Chat</span>
                       </a>
                     )}
                     <a
                       href={`mailto:${enq.email}?subject=ZetaVex%20Tech%20Solutions%20-%20Enquiry%20Response`}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#292524] text-[#DCD8CF] hover:text-white text-xs font-semibold hover:bg-[#44403C] flex items-center gap-1 border border-[#44403C]"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#292524] text-[#DCD8CF] hover:text-white text-xs font-semibold hover:bg-[#44403C] flex items-center gap-1 border border-[#44403C] active:scale-95"
                       title="Email Reply"
                     >
-                      <Mail className="w-3 h-3" />
+                      <Mail className="w-3.5 h-3.5" />
                       <span>Email</span>
                     </a>
                   </div>
@@ -331,7 +345,7 @@ export default function AdminDashboardPage() {
           <div className="mt-6 pt-4 border-t border-[#292524]">
             <Link
               href="/admin/services"
-              className="w-full flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-gradient-to-r from-[#FF5500] to-[#FF3366] hover:opacity-95 rounded-xl shadow-md"
+              className="w-full flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-gradient-to-r from-[#FF5500] to-[#FF3366] hover:opacity-95 rounded-xl shadow-md active:scale-95 transition-transform"
             >
               <span>Manage Services Catalog</span>
               <ArrowUpRight className="w-4 h-4" />

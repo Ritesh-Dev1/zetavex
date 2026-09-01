@@ -15,6 +15,8 @@ import {
   getActiveTeamMembers, 
   getApprovedReviews 
 } from '@/lib/supabase/admin';
+import { getServicesListSchema, getBreadcrumbSchema } from '@/lib/seo';
+import JsonLd from '@/components/seo/JsonLd';
 
 export const revalidate = 0; // Dynamic data for live updates from admin
 
@@ -26,8 +28,16 @@ export default async function HomePage() {
     getApprovedReviews(),
   ]);
 
+  const servicesListSchema = getServicesListSchema();
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+  ]);
+
   return (
     <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+      {/* Schema.org Structured Data */}
+      <JsonLd data={[servicesListSchema, breadcrumbSchema]} />
+
       {/* Sticky Desktop & Mobile Header */}
       <Header />
 
@@ -42,7 +52,7 @@ export default async function HomePage() {
       {/* Global Footer */}
       <Footer />
 
-      {/* Floating WhatsApp & Call Actions */}
+      {/* Floating WhatsApp Actions */}
       <FloatingActions />
 
       {/* Fixed Mobile Bottom Navigation */}

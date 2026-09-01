@@ -10,12 +10,14 @@ import {
   CheckCircle2, 
   AlertCircle,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -33,7 +35,6 @@ export default function AdminProjectsPage() {
   const [status, setStatus] = useState<'published' | 'draft' | 'archived'>('published');
 
   const fetchProjects = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/admin/projects');
       const data = await res.json();
@@ -62,7 +63,7 @@ export default function AdminProjectsPage() {
     setDescription('');
     setImageUrl('https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80');
     setDemoUrl('');
-    setTechTagsStr('Next.js, Supabase, Tailwind');
+    setTechTagsStr('React, Node.js, Tailwind');
     setIsFeatured(false);
     setSortOrder(projects.length + 1);
     setStatus('published');
@@ -86,6 +87,7 @@ export default function AdminProjectsPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     const tech_tags = techTagsStr
       .split(',')
       .map(t => t.trim())
@@ -93,6 +95,21 @@ export default function AdminProjectsPage() {
 
     try {
       if (editingProject) {
+        // Optimistic UI update
+        setProjects(prev => prev.map(p => p.id === editingProject.id ? {
+          ...p,
+          title,
+          slug,
+          category,
+          description,
+          image_url: imageUrl,
+          demo_url: demoUrl,
+          tech_tags,
+          is_featured: isFeatured,
+          sort_order: Number(sortOrder),
+          status,
+        } : p));
+
         const res = await fetch('/api/admin/projects', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -137,18 +154,25 @@ export default function AdminProjectsPage() {
       fetchProjects();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchProjects();
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this project?')) return;
+    
+    // Instant Optimistic delete
+    setProjects(prev => prev.filter(p => p.id !== id));
+    showNotification('success', 'Project deleted.');
+
     try {
       const res = await fetch(`/api/admin/projects?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      showNotification('success', 'Project deleted.');
-      fetchProjects();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchProjects();
     }
   };
 
@@ -167,7 +191,7 @@ export default function AdminProjectsPage() {
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Add Project</span>
@@ -191,10 +215,17 @@ export default function AdminProjectsPage() {
         </div>
       )}
 
-      {/* Projects Grid */}
+      {/* Projects Grid with Skeleton Loader */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-xs text-[#78716C]">Loading projects...</div>
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-[#1C1917] rounded-3xl border border-[#292524] overflow-hidden p-4 flex flex-col gap-3 animate-pulse">
+              <div className="aspect-[16/10] bg-[#292524] rounded-2xl w-full" />
+              <div className="h-5 bg-[#292524] rounded w-3/4" />
+              <div className="h-3 bg-[#292524] rounded w-full" />
+              <div className="h-3 bg-[#292524] rounded w-1/2" />
+            </div>
+          ))
         ) : projects.length === 0 ? (
           <div className="col-span-full py-12 text-center text-xs text-[#78716C]">No projects found.</div>
         ) : (
@@ -260,14 +291,14 @@ export default function AdminProjectsPage() {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(p)}
-                      className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF]"
+                      className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF] active:scale-95"
                       title="Edit Project"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300"
+                      className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300 active:scale-95"
                       title="Delete Project"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -387,7 +418,7 @@ export default function AdminProjectsPage() {
                   type="text"
                   value={techTagsStr}
                   onChange={(e) => setTechTagsStr(e.target.value)}
-                  placeholder="Next.js, Supabase, Tailwind CSS, PostgreSQL"
+                  placeholder="React, Node.js, PostgreSQL, Tailwind"
                   className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                 />
               </div>
@@ -437,9 +468,17 @@ export default function AdminProjectsPage() {
               <div className="flex items-center gap-3 pt-4 border-t border-[#292524] mt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md"
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md disabled:opacity-50"
                 >
-                  {editingProject ? 'Save Updates' : 'Add Project'}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>{editingProject ? 'Save Updates' : 'Add Project'}</span>
+                  )}
                 </button>
                 <button
                   type="button"

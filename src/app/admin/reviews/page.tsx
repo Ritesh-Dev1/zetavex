@@ -5,30 +5,29 @@ import { ClientReview } from '@/lib/types';
 import { 
   Star, 
   Plus, 
-  Edit3, 
   Trash2, 
   CheckCircle2, 
   AlertCircle,
-  Quote
+  Quote,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<ClientReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingReview, setEditingReview] = useState<ClientReview | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Form State
   const [clientName, setClientName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [role, setRole] = useState('');
-  const [quote, setQuote] = useState('');
   const [rating, setRating] = useState(5);
+  const [quote, setQuote] = useState('');
   const [isApproved, setIsApproved] = useState(true);
 
   const fetchReviews = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/admin/reviews');
       const data = await res.json();
@@ -50,93 +49,75 @@ export default function AdminReviewsPage() {
   };
 
   const handleOpenAdd = () => {
-    setEditingReview(null);
     setClientName('');
     setCompanyName('');
-    setRole('Founder & CEO');
-    setQuote('');
+    setRole('Chief Technology Officer');
     setRating(5);
+    setQuote('');
     setIsApproved(true);
-    setModalOpen(true);
-  };
-
-  const handleOpenEdit = (r: ClientReview) => {
-    setEditingReview(r);
-    setClientName(r.client_name);
-    setCompanyName(r.company_name);
-    setRole(r.role || '');
-    setQuote(r.quote);
-    setRating(r.rating);
-    setIsApproved(r.is_approved);
     setModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
 
     try {
-      if (editingReview) {
-        const res = await fetch('/api/admin/reviews', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: editingReview.id,
-            client_name: clientName,
-            company_name: companyName,
-            role,
-            quote,
-            rating: Number(rating),
-            is_approved: isApproved,
-          }),
-        });
-        if (!res.ok) throw new Error('Failed to update review');
-        showNotification('success', 'Review updated successfully');
-      } else {
-        const res = await fetch('/api/admin/reviews', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            client_name: clientName,
-            company_name: companyName,
-            role,
-            quote,
-            rating: Number(rating),
-            is_approved: isApproved,
-          }),
-        });
-        if (!res.ok) throw new Error('Failed to create review');
-        showNotification('success', 'Review added successfully');
-      }
+      const res = await fetch('/api/admin/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_name: clientName,
+          company_name: companyName,
+          role,
+          rating: Number(rating),
+          quote,
+          is_approved: isApproved,
+        }),
+      });
 
+      if (!res.ok) throw new Error('Failed to create review');
+      showNotification('success', 'Review added successfully');
       setModalOpen(false);
       fetchReviews();
     } catch (err: any) {
       showNotification('error', err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this review?')) return;
+    
+    // Instant Optimistic delete
+    setReviews(prev => prev.filter(r => r.id !== id));
+    showNotification('success', 'Review removed.');
+
     try {
       const res = await fetch(`/api/admin/reviews?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      showNotification('success', 'Review deleted.');
-      fetchReviews();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchReviews();
     }
   };
 
-  const handleToggleApproved = async (r: ClientReview) => {
+  const handleToggleApproval = async (r: ClientReview) => {
+    const newApproval = !r.is_approved;
+    
+    // Instant Optimistic update
+    setReviews(prev => prev.map(item => item.id === r.id ? { ...item, is_approved: newApproval } : item));
+
     try {
       await fetch('/api/admin/reviews', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: r.id, is_approved: !r.is_approved }),
+        body: JSON.stringify({ id: r.id, is_approved: newApproval }),
       });
-      fetchReviews();
     } catch (err) {
       console.error(err);
+      fetchReviews();
     }
   };
 
@@ -146,16 +127,16 @@ export default function AdminReviewsPage() {
         <div>
           <h1 className="text-2xl font-black text-white flex items-center gap-2">
             <Star className="w-6 h-6 text-[#FF5500]" />
-            <span>Manage Client Reviews &amp; Testimonials</span>
+            <span>Manage Client Endorsements &amp; Reviews</span>
           </h1>
           <p className="text-xs text-[#A8A29E] mt-1">
-            Moderate, approve, and curate client endorsements rendered on the public website.
+            Publish, edit, or approve verified ratings and quotes shown on the homepage.
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Add Review</span>
@@ -179,10 +160,19 @@ export default function AdminReviewsPage() {
         </div>
       )}
 
-      {/* Reviews Grid */}
+      {/* Reviews Grid with Skeleton Loader */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-12 text-center text-xs text-[#78716C]">Loading reviews...</div>
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-[#1C1917] rounded-3xl border border-[#292524] p-6 flex flex-col justify-between gap-4 animate-pulse">
+              <div className="flex justify-between items-center">
+                <div className="w-24 h-4 bg-[#292524] rounded" />
+                <div className="w-6 h-6 bg-[#292524] rounded" />
+              </div>
+              <div className="h-16 bg-[#292524] rounded" />
+              <div className="h-10 bg-[#292524] rounded" />
+            </div>
+          ))
         ) : reviews.length === 0 ? (
           <div className="col-span-full py-12 text-center text-xs text-[#78716C]">No reviews found.</div>
         ) : (
@@ -198,24 +188,12 @@ export default function AdminReviewsPage() {
                       <Star
                         key={i}
                         className={`w-3.5 h-3.5 ${
-                          i < r.rating
-                            ? 'fill-[#FF5500] text-[#FF5500]'
-                            : 'fill-[#292524] text-[#292524]'
+                          i < r.rating ? 'fill-[#FF5500] text-[#FF5500]' : 'fill-[#292524] text-[#292524]'
                         }`}
                       />
                     ))}
                   </div>
-
-                  <button
-                    onClick={() => handleToggleApproved(r)}
-                    className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
-                      r.is_approved
-                        ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                        : 'bg-stone-800 text-stone-400'
-                    }`}
-                  >
-                    {r.is_approved ? 'Approved' : 'Pending'}
-                  </button>
+                  <Quote className="w-5 h-5 text-[#44403C]" />
                 </div>
 
                 <p className="text-xs text-[#DCD8CF] italic leading-relaxed mb-6">
@@ -223,29 +201,34 @@ export default function AdminReviewsPage() {
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-[#292524] flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold text-white">{r.client_name}</h4>
-                  <span className="text-[10px] text-[#A8A29E]">
-                    {r.role ? `${r.role}, ` : ''}{r.company_name}
-                  </span>
-                </div>
+              <div>
+                <div className="pt-4 border-t border-[#292524] flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-white">{r.client_name}</h4>
+                    <p className="text-[11px] text-[#A8A29E]">
+                      {r.role ? `${r.role}, ` : ''}{r.company_name}
+                    </p>
+                  </div>
 
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => handleOpenEdit(r)}
-                    className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF]"
-                    title="Edit Review"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(r.id)}
-                    className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300"
-                    title="Delete Review"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleApproval(r)}
+                      className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold cursor-pointer transition-colors ${
+                        r.is_approved
+                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                          : 'bg-amber-950 text-amber-400 border border-amber-800'
+                      }`}
+                    >
+                      {r.is_approved ? 'Approved' : 'Pending'}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(r.id)}
+                      className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300 active:scale-95"
+                      title="Delete Review"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -253,14 +236,12 @@ export default function AdminReviewsPage() {
         )}
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#1C1917] border border-[#292524] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-white">
-                {editingReview ? 'Edit Review' : 'Add Client Review'}
-              </h3>
+              <h3 className="text-lg font-black text-white">Add Client Endorsement</h3>
               <button
                 onClick={() => setModalOpen(false)}
                 className="w-7 h-7 rounded-full bg-[#292524] hover:bg-[#44403C] flex items-center justify-center text-xs text-white"
@@ -280,7 +261,7 @@ export default function AdminReviewsPage() {
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                     required
-                    placeholder="Rajesh Kumar"
+                    placeholder="e.g. Johnathan Hayes"
                     className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                   />
                 </div>
@@ -294,7 +275,7 @@ export default function AdminReviewsPage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     required
-                    placeholder="Apex Global Logistics"
+                    placeholder="e.g. CloudScale Global"
                     className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                   />
                 </div>
@@ -303,45 +284,43 @@ export default function AdminReviewsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#A8A29E] mb-1">
-                    Client Role / Title
+                    Role / Title
                   </label>
                   <input
                     type="text"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    placeholder="Director of Operations"
+                    placeholder="e.g. Chief Product Officer"
                     className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#A8A29E] mb-1">
-                    Star Rating (1-5)
+                    Rating (1 to 5)
                   </label>
                   <select
                     value={rating}
                     onChange={(e) => setRating(Number(e.target.value))}
                     className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                   >
-                    <option value={5}>★★★★★ (5 Stars)</option>
-                    <option value={4}>★★★★☆ (4 Stars)</option>
-                    <option value={3}>★★★☆☆ (3 Stars)</option>
-                    <option value={2}>★★☆☆☆ (2 Stars)</option>
-                    <option value={1}>★☆☆☆☆ (1 Star)</option>
+                    <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
+                    <option value={3}>⭐⭐⭐ (3 Stars)</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase text-[#A8A29E] mb-1">
-                  Testimonial Quote *
+                  Endorsement Quote *
                 </label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={quote}
                   onChange={(e) => setQuote(e.target.value)}
                   required
-                  placeholder="What did the client say about your engineering delivery and speed?"
+                  placeholder="Share feedback on engineering velocity, architecture, and team collaboration..."
                   className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                 />
               </div>
@@ -354,16 +333,24 @@ export default function AdminReviewsPage() {
                     onChange={(e) => setIsApproved(e.target.checked)}
                     className="w-4 h-4 rounded text-[#FF5500] focus:ring-[#FF5500]"
                   />
-                  <span>Approved for Public Website Display</span>
+                  <span>Approve immediately for live public display</span>
                 </label>
               </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-[#292524] mt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md"
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md disabled:opacity-50"
                 >
-                  {editingReview ? 'Save Updates' : 'Add Review'}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>Add Review</span>
+                  )}
                 </button>
                 <button
                   type="button"

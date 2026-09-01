@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { COMPANY_INFO } from '@/lib/constants';
-import { MessageSquare, Shield, Menu, X, ArrowUpRight } from 'lucide-react';
+import { MessageSquare, Menu, X, ArrowUpRight } from 'lucide-react';
 
 export default function Header() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -18,12 +20,12 @@ export default function Header() {
   }, []);
 
   const navLinks = [
-    { label: 'Home', href: '#' },
-    { label: 'Services', href: '#services' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Team', href: '#team' },
-    { label: 'Reviews', href: '#reviews' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'Home', href: '/' },
+    { label: 'Services', href: '/services' },
+    { label: 'Projects', href: '/projects' },
+    { label: 'Team', href: '/team' },
+    { label: 'Reviews', href: '/#reviews' },
+    { label: 'Contact', href: '/#contact' },
   ];
 
   return (
@@ -57,28 +59,26 @@ export default function Header() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-1 bg-[#F4F1EA]/80 backdrop-blur-sm border border-[#EBE8E1] px-3 py-1.5 rounded-full shadow-xs">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="px-4 py-1.5 text-sm font-semibold text-[#44403C] hover:text-[#FF5500] hover:bg-white rounded-full transition-all duration-200"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white text-[#FF5500] shadow-xs'
+                      : 'text-[#44403C] hover:text-[#FF5500] hover:bg-white'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Action CTAs */}
+          {/* Action CTAs (Admin Portal button removed from public header) */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/admin/login"
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#57534E] hover:text-[#1C1917] hover:bg-[#EBE8E1] rounded-lg transition-colors border border-transparent hover:border-[#DCD8CF]"
-              title="Client Admin Portal"
-            >
-              <Shield className="w-3.5 h-3.5 text-[#FF5500]" />
-              <span>Admin Portal</span>
-            </Link>
-
             <a
               href={COMPANY_INFO.whatsappUrl}
               target="_blank"
@@ -113,29 +113,21 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu (Top Drawer) */}
+      {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#FAF8F5] border-b border-[#EBE8E1] px-4 pt-3 pb-6 shadow-lg animate-in slide-in-from-top-2 duration-200">
           <div className="flex flex-col gap-1">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-4 py-2.5 text-base font-semibold text-[#1C1917] hover:bg-[#F4F1EA] rounded-lg transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <div className="pt-3 mt-2 border-t border-[#EBE8E1] flex flex-col gap-2">
-              <Link
-                href="/admin/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#1C1917] bg-[#F4F1EA] hover:bg-[#EBE8E1] border border-[#EBE8E1] rounded-xl"
-              >
-                <Shield className="w-4 h-4 text-[#FF5500]" />
-                <span>Admin Management Portal</span>
-              </Link>
               <a
                 href={COMPANY_INFO.whatsappUrl}
                 target="_blank"

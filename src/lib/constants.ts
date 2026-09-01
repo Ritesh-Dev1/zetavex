@@ -14,6 +14,8 @@ export const COMPANY_INFO = {
   email: 'zetavextech@outlook.com',
   address: 'Rewari, Haryana, India',
   udyamRegNo: 'UDYAM-HR-15-0041364',
+  instagramUrl: 'https://www.instagram.com/zetavextech',
+  linkedinUrl: 'https://www.linkedin.com/company/zetavex-tech-solutions',
   heroValueProp: 'Transforming ambitious ideas into scalable digital solutions for global enterprises.',
 };
 

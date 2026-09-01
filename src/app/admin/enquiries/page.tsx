@@ -12,7 +12,8 @@ import {
   Download, 
   Filter,
   Clock,
-  Send
+  Send,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminEnquiriesPage() {
@@ -22,7 +23,6 @@ export default function AdminEnquiriesPage() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const fetchEnquiries = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/admin/enquiries');
       const data = await res.json();
@@ -44,6 +44,10 @@ export default function AdminEnquiriesPage() {
   };
 
   const handleUpdateStatus = async (id: string, status: Enquiry['status']) => {
+    // Instant Optimistic update
+    setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+    showNotification('success', `Status changed to "${status}"`);
+
     try {
       const res = await fetch('/api/admin/enquiries', {
         method: 'PATCH',
@@ -51,22 +55,25 @@ export default function AdminEnquiriesPage() {
         body: JSON.stringify({ id, status }),
       });
       if (!res.ok) throw new Error('Failed to update status');
-      showNotification('success', `Status changed to "${status}"`);
-      fetchEnquiries();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchEnquiries();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this enquiry?')) return;
+    
+    // Instant Optimistic delete
+    setEnquiries(prev => prev.filter(e => e.id !== id));
+    showNotification('success', 'Enquiry deleted.');
+
     try {
       const res = await fetch(`/api/admin/enquiries?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      showNotification('success', 'Enquiry deleted.');
-      fetchEnquiries();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchEnquiries();
     }
   };
 
@@ -148,7 +155,7 @@ export default function AdminEnquiriesPage() {
           <button
             key={tab}
             onClick={() => setStatusFilter(tab)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap active:scale-95 ${
               statusFilter === tab
                 ? 'bg-[#FF5500] text-white shadow-sm'
                 : 'bg-[#1C1917] text-[#A8A29E] hover:text-white border border-[#292524]'
@@ -159,11 +166,19 @@ export default function AdminEnquiriesPage() {
         ))}
       </div>
 
-      {/* Enquiries List */}
+      {/* Enquiries List with Skeleton Loader */}
       <div className="flex flex-col gap-4">
         {loading ? (
-          <div className="py-12 text-center text-xs text-[#78716C] bg-[#1C1917] rounded-3xl border border-[#292524]">
-            Loading enquiries...
+          <div className="flex flex-col gap-3 animate-pulse">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-[#1C1917] rounded-3xl border border-[#292524] p-6 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-48 h-5 bg-[#292524] rounded" />
+                  <div className="w-24 h-4 bg-[#292524] rounded" />
+                </div>
+                <div className="h-12 bg-[#0C0A09] rounded-2xl" />
+              </div>
+            ))}
           </div>
         ) : filteredEnquiries.length === 0 ? (
           <div className="py-12 text-center text-xs text-[#78716C] bg-[#1C1917] rounded-3xl border border-[#292524]">
@@ -233,7 +248,7 @@ export default function AdminEnquiriesPage() {
                       href={`https://wa.me/${enq.phone.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(enq.name)}%2C%20thank%20you%20for%20contacting%20ZetaVex%20Tech%20Solutions.`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-xl shadow-xs transition-colors"
+                      className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-white bg-[#25D366] hover:bg-[#20bd5a] rounded-xl shadow-xs transition-colors active:scale-95"
                     >
                       <MessageSquare className="w-3.5 h-3.5 fill-white" />
                       <span>WhatsApp Lead</span>
@@ -242,7 +257,7 @@ export default function AdminEnquiriesPage() {
 
                   <a
                     href={`mailto:${enq.email}?subject=ZetaVex%20Tech%20Solutions%20-%20Project%20Enquiry%20Response`}
-                    className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-[#DCD8CF] hover:text-white bg-[#292524] hover:bg-[#44403C] rounded-xl border border-[#44403C] transition-colors"
+                    className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-[#DCD8CF] hover:text-white bg-[#292524] hover:bg-[#44403C] rounded-xl border border-[#44403C] transition-colors active:scale-95"
                   >
                     <Mail className="w-3.5 h-3.5" />
                     <span>Send Email</span>
@@ -250,7 +265,7 @@ export default function AdminEnquiriesPage() {
 
                   <button
                     onClick={() => handleDelete(enq.id)}
-                    className="flex items-center justify-center gap-2 py-2 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 rounded-xl transition-colors"
+                    className="flex items-center justify-center gap-2 py-2 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 rounded-xl transition-colors active:scale-95"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete Record</span>

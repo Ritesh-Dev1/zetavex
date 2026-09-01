@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminByEmail } from '@/lib/supabase/admin';
+import { getAdminByEmail, isAdminConfiguredInEnv } from '@/lib/supabase/admin';
 import { verifyPassword, signAdminToken, COOKIE_NAME } from '@/lib/auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
@@ -28,7 +28,19 @@ export async function POST(req: NextRequest) {
     }
 
     const admin = await getAdminByEmail(email);
+
+    // If no admin user is found and no admin is configured in the environment (.env)
     if (!admin) {
+      if (!isAdminConfiguredInEnv()) {
+        return NextResponse.json(
+          { 
+            error: 'Admin login is not configured in your environment (.env). Please contact the developer for admin access.',
+            unconfigured: true
+          },
+          { status: 503 }
+        );
+      }
+
       return NextResponse.json(
         { error: 'Invalid email or password credentials.' },
         { status: 401 }
@@ -37,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (admin.status !== 'active') {
       return NextResponse.json(
-        { error: 'This admin account is currently inactive.' },
+        { error: 'This admin account is currently inactive. Please contact the developer.' },
         { status: 403 }
       );
     }

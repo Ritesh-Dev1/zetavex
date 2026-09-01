@@ -131,9 +131,11 @@ export default function PixelGridAssembly() {
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', handleMouseLeave);
 
+    const context = ctx;
     let progress = 0;
     function render() {
-      ctx.clearRect(0, 0, width, height);
+      if (!context) return;
+      context.clearRect(0, 0, width, height);
       progress += 0.01;
 
       let allSettled = true;
@@ -166,17 +168,17 @@ export default function PixelGridAssembly() {
           renderY += Math.sin(repelAngle) * force * 20;
         }
 
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.opacity;
+        context.fillStyle = p.color;
+        context.globalAlpha = p.opacity;
 
         // Draw pixel rounded square
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size, 1);
+        context.beginPath();
+        if (context.roundRect) {
+          context.roundRect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size, 1);
         } else {
-          ctx.rect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size);
+          context.rect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size);
         }
-        ctx.fill();
+        context.fill();
       }
 
       if (allSettled && !assembled) {

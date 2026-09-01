@@ -67,7 +67,9 @@ export default function ReviewsSection({ initialReviews }: ReviewsSectionProps) 
                     <h4 className="text-xs sm:text-sm font-bold text-[#0A0A0B] truncate">
                       {review.client_name}
                     </h4>
-                    <CheckCircle2 className="w-3 h-3 text-[#10B981] shrink-0" title="Verified Client" />
+                    <span title="Verified Client">
+                      <CheckCircle2 className="w-3 h-3 text-[#10B981] shrink-0" />
+                    </span>
                   </div>
                   <p className="text-[10px] sm:text-xs text-[#78716C] truncate">
                     {review.company_name}

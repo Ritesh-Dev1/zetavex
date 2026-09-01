@@ -18,12 +18,14 @@ import {
   Zap,
   Globe,
   Database,
-  Server
+  Server,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -38,7 +40,6 @@ export default function AdminServicesPage() {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
   const fetchServices = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/admin/services');
       const data = await res.json();
@@ -65,7 +66,7 @@ export default function AdminServicesPage() {
     setSlug('');
     setDescription('');
     setIconName('Code');
-    setTechTagsStr('Next.js, React, Node.js');
+    setTechTagsStr('React, Node.js, PostgreSQL');
     setSortOrder(services.length + 1);
     setStatus('active');
     setModalOpen(true);
@@ -85,6 +86,7 @@ export default function AdminServicesPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     const tech_tags = techTagsStr
       .split(',')
       .map(t => t.trim())
@@ -92,7 +94,18 @@ export default function AdminServicesPage() {
 
     try {
       if (editingService) {
-        // Edit PUT
+        // Optimistic UI update
+        setServices(prev => prev.map(s => s.id === editingService.id ? {
+          ...s,
+          title,
+          slug,
+          description,
+          icon_name: iconName,
+          tech_tags,
+          sort_order: Number(sortOrder),
+          status,
+        } : s));
+
         const res = await fetch('/api/admin/services', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -110,7 +123,6 @@ export default function AdminServicesPage() {
         if (!res.ok) throw new Error('Failed to update service');
         showNotification('success', 'Service updated successfully');
       } else {
-        // Create POST
         const res = await fetch('/api/admin/services', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -132,32 +144,43 @@ export default function AdminServicesPage() {
       fetchServices();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchServices();
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this service?')) return;
+    
+    // Instant Optimistic delete
+    setServices(prev => prev.filter(s => s.id !== id));
+    showNotification('success', 'Service deleted.');
+
     try {
       const res = await fetch(`/api/admin/services?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      showNotification('success', 'Service deleted.');
-      fetchServices();
     } catch (err: any) {
       showNotification('error', err.message);
+      fetchServices();
     }
   };
 
   const handleToggleStatus = async (s: Service) => {
     const newStatus = s.status === 'active' ? 'inactive' : 'active';
+    
+    // Instant Optimistic toggle
+    setServices(prev => prev.map(item => item.id === s.id ? { ...item, status: newStatus } : item));
+
     try {
       await fetch('/api/admin/services', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: s.id, status: newStatus }),
       });
-      fetchServices();
     } catch (err) {
       console.error(err);
+      fetchServices();
     }
   };
 
@@ -177,7 +200,7 @@ export default function AdminServicesPage() {
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Service</span>
@@ -201,10 +224,21 @@ export default function AdminServicesPage() {
         </div>
       )}
 
-      {/* Services Table / Cards */}
+      {/* Services Table with Skeleton Loader */}
       <div className="bg-[#1C1917] rounded-3xl border border-[#292524] overflow-hidden">
         {loading ? (
-          <div className="py-12 text-center text-xs text-[#78716C]">Loading services...</div>
+          <div className="p-6 flex flex-col gap-3 animate-pulse">
+            <div className="h-8 bg-[#0C0A09] rounded-lg w-full mb-2" />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-14 bg-[#292524]/60 rounded-xl flex items-center justify-between px-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#1C1917] rounded-lg" />
+                  <div className="w-40 h-4 bg-[#1C1917] rounded" />
+                </div>
+                <div className="w-20 h-6 bg-[#1C1917] rounded-full" />
+              </div>
+            ))}
+          </div>
         ) : services.length === 0 ? (
           <div className="py-12 text-center text-xs text-[#78716C]">No services found. Click &ldquo;Add New Service&rdquo; to create one.</div>
         ) : (
@@ -248,10 +282,10 @@ export default function AdminServicesPage() {
                     <td className="py-4 px-4">
                       <button
                         onClick={() => handleToggleStatus(s)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase cursor-pointer transition-all active:scale-95 ${
                           s.status === 'active'
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                            : 'bg-stone-800 text-stone-400 border border-stone-700'
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/60'
+                            : 'bg-stone-800 text-stone-400 border border-stone-700 hover:bg-stone-700'
                         }`}
                       >
                         {s.status}
@@ -261,14 +295,14 @@ export default function AdminServicesPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(s)}
-                          className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF] hover:text-white transition-colors"
+                          className="p-1.5 rounded-lg bg-[#292524] hover:bg-[#44403C] text-[#DCD8CF] hover:text-white transition-colors active:scale-95"
                           title="Edit Service"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(s.id)}
-                          className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300 transition-colors"
+                          className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-300 transition-colors active:scale-95"
                           title="Delete Service"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -372,7 +406,7 @@ export default function AdminServicesPage() {
                   type="text"
                   value={techTagsStr}
                   onChange={(e) => setTechTagsStr(e.target.value)}
-                  placeholder="Next.js, React, Node.js, PostgreSQL"
+                  placeholder="React, Node.js, PostgreSQL, AWS"
                   className="w-full px-3.5 py-2.5 bg-[#0C0A09] border border-[#292524] focus:border-[#FF5500] rounded-xl text-white text-xs outline-none"
                 />
               </div>
@@ -409,9 +443,17 @@ export default function AdminServicesPage() {
               <div className="flex items-center gap-3 pt-4 border-t border-[#292524] mt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md"
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl shadow-md disabled:opacity-50"
                 >
-                  {editingService ? 'Save Updates' : 'Create Service'}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>{editingService ? 'Save Updates' : 'Create Service'}</span>
+                  )}
                 </button>
                 <button
                   type="button"
