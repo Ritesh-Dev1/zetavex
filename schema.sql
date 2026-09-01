@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS public.enquiries (
     message TEXT NOT NULL,
     ip_hash TEXT,
     status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'resolved', 'spam')),
+    terms_accepted BOOLEAN NOT NULL DEFAULT false,
+    terms_accepted_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

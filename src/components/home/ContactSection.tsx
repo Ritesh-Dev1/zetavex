@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { COMPANY_INFO, INITIAL_SERVICES } from '@/lib/constants';
 import { 
   Sparkles, 
@@ -10,10 +11,11 @@ import {
   FileBadge, 
   CheckCircle2, 
   AlertCircle, 
-  MessageSquare,
-  MessageCircle,
-  Clock,
-  ShieldCheck
+  MessageSquare, 
+  MessageCircle, 
+  Clock, 
+  ShieldCheck,
+  CheckSquare
 } from 'lucide-react';
 
 export default function ContactSection() {
@@ -23,6 +25,7 @@ export default function ContactSection() {
     phone: '',
     service_requested: 'Full-Stack Development',
     message: '',
+    terms_accepted: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,8 +37,19 @@ export default function ContactSection() {
     if (errorMessage) setErrorMessage(null);
   };
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, terms_accepted: e.target.checked }));
+    if (errorMessage) setErrorMessage(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.terms_accepted) {
+      setErrorMessage('Please accept the Terms & Conditions and Privacy Policy before submitting.');
+      return;
+    }
+
     setLoading(true);
     setSuccessMessage(null);
     setErrorMessage(null);
@@ -60,6 +74,7 @@ export default function ContactSection() {
         phone: '',
         service_requested: 'Full-Stack Development',
         message: '',
+        terms_accepted: false,
       });
     } catch (err: any) {
       setErrorMessage(err.message || 'An unexpected error occurred. Please try WhatsApp directly.');
@@ -305,11 +320,43 @@ export default function ContactSection() {
                 />
               </div>
 
+              {/* Required Terms & Conditions and Privacy Policy Checkbox (Blank by default) */}
+              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1] flex items-start gap-3 transition-colors hover:border-[#DCD8CF]">
+                <input
+                  id="terms_accepted"
+                  type="checkbox"
+                  name="terms_accepted"
+                  checked={formData.terms_accepted}
+                  onChange={handleCheckboxChange}
+                  required
+                  className="w-4 h-4 mt-0.5 rounded text-[#FF5500] focus:ring-[#FF5500] border-[#DCD8CF] accent-[#FF5500] cursor-pointer shrink-0"
+                />
+                <label htmlFor="terms_accepted" className="text-xs text-[#57534E] leading-relaxed cursor-pointer select-none">
+                  I have read, understood, and agree to the{' '}
+                  <Link
+                    href="/terms-and-conditions"
+                    target="_blank"
+                    className="font-bold text-[#0A0A0B] underline hover:text-[#FF5500] transition-colors"
+                  >
+                    Terms &amp; Conditions
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href="/privacy-policy"
+                    target="_blank"
+                    className="font-bold text-[#0A0A0B] underline hover:text-[#FF5500] transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                  . *
+                </label>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-4 px-6 text-sm font-black text-white bg-gradient-to-r from-[#FF5500] to-[#FF3366] hover:opacity-95 rounded-xl shadow-lg shadow-orange-500/25 transition-all duration-200 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-4 px-6 text-sm font-black text-white bg-gradient-to-r from-[#FF5500] to-[#FF3366] hover:opacity-95 rounded-xl shadow-lg shadow-orange-500/25 transition-all duration-200 disabled:opacity-50 active:scale-[0.99]"
               >
                 {loading ? (
                   <span className="flex items-center gap-2">

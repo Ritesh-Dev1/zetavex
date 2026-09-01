@@ -70,6 +70,8 @@ export interface Enquiry {
   message: string;
   ip_hash?: string;
   status: 'new' | 'contacted' | 'resolved' | 'spam';
+  terms_accepted?: boolean;
+  terms_accepted_at?: string;
   created_at?: string;
 }
 

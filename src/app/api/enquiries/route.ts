@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, email, phone, service_requested, message } = body;
+    const { name, email, phone, service_requested, message, terms_accepted } = body;
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: 'Please enter your full name.' }, { status: 400 });
@@ -29,10 +29,19 @@ export async function POST(req: NextRequest) {
 
     if (!message || message.trim().length < 10) {
       return NextResponse.json(
-        { error: 'Please provide a message with at least 10 characters.' },
+        { error: 'Please provide a message with at least 10 characters describing your project requirements.' },
         { status: 400 }
       );
     }
+
+    if (!terms_accepted) {
+      return NextResponse.json(
+        { error: 'You must accept the Terms & Conditions and Privacy Policy to submit an enquiry.' },
+        { status: 400 }
+      );
+    }
+
+    const nowIso = new Date().toISOString();
 
     const newEnquiry = await createEnquiry({
       name: name.trim(),
@@ -42,11 +51,14 @@ export async function POST(req: NextRequest) {
       message: message.trim(),
       ip_hash: hashClientIp(ip),
       status: 'new',
+      terms_accepted: true,
+      terms_accepted_at: nowIso,
+      created_at: nowIso,
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Thank you! Your enquiry has been received. Our team will contact you shortly.',
+      message: 'Thank you! Your enquiry has been received. Our engineering team will contact you shortly.',
       enquiryId: newEnquiry.id,
       remainingAttempts: rateCheck.remaining,
     });

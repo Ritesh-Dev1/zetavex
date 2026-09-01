@@ -520,18 +520,31 @@ export async function getAllEnquiries(): Promise<Enquiry[]> {
 }
 
 export async function createEnquiry(enquiry: Omit<Enquiry, 'id'>): Promise<Enquiry> {
+  const nowIso = new Date().toISOString();
   const newEnquiry: Enquiry = {
     ...enquiry,
     id: `enq-${Date.now()}`,
     status: enquiry.status || 'new',
-    created_at: new Date().toISOString(),
+    terms_accepted: enquiry.terms_accepted ?? true,
+    terms_accepted_at: enquiry.terms_accepted_at || nowIso,
+    created_at: enquiry.created_at || nowIso,
   };
 
   if (supabaseAdmin) {
     try {
       const { data, error } = await supabaseAdmin
         .from('enquiries')
-        .insert([enquiry])
+        .insert([{
+          name: enquiry.name,
+          email: enquiry.email,
+          phone: enquiry.phone,
+          service_requested: enquiry.service_requested,
+          message: enquiry.message,
+          ip_hash: enquiry.ip_hash,
+          status: enquiry.status || 'new',
+          terms_accepted: enquiry.terms_accepted ?? true,
+          terms_accepted_at: enquiry.terms_accepted_at || nowIso,
+        }])
         .select()
         .single();
       if (!error && data) return data as Enquiry;

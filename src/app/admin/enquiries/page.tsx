@@ -84,13 +84,15 @@ export default function AdminEnquiriesPage() {
 
   const handleExportCSV = () => {
     if (enquiries.length === 0) return;
-    const headers = ['ID', 'Name', 'Email', 'Phone', 'Service', 'Status', 'Date', 'Message'];
+    const headers = ['ID', 'Name', 'Email', 'Phone', 'Service', 'Terms Accepted', 'Terms Accepted At', 'Status', 'Date', 'Message'];
     const rows = enquiries.map(e => [
       `"${e.id}"`,
       `"${e.name.replace(/"/g, '""')}"`,
       `"${e.email}"`,
       `"${e.phone || ''}"`,
       `"${e.service_requested || ''}"`,
+      `"${e.terms_accepted ? 'Yes' : 'No'}"`,
+      `"${e.terms_accepted_at || e.created_at || ''}"`,
       `"${e.status}"`,
       `"${e.created_at || ''}"`,
       `"${e.message.replace(/"/g, '""')}"`,
@@ -207,8 +209,15 @@ export default function AdminEnquiriesPage() {
                   )}
                 </div>
 
-                <div className="inline-block px-2.5 py-1 rounded-md text-xs font-semibold bg-[#0C0A09] text-[#FF5500] border border-[#292524] w-fit">
-                  Requested: {enq.service_requested || 'General Consultation'}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-block px-2.5 py-1 rounded-md text-xs font-semibold bg-[#0C0A09] text-[#FF5500] border border-[#292524]">
+                    Requested: {enq.service_requested || 'General Consultation'}
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-950/40 text-emerald-400 border border-emerald-800/40">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    <span>Terms &amp; Privacy Agreed: {new Date(enq.terms_accepted_at || enq.created_at || Date.now()).toLocaleString()}</span>
+                  </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#0C0A09] border border-[#292524] text-xs text-[#DCD8CF] leading-relaxed whitespace-pre-wrap">
