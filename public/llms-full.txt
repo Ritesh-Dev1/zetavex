@@ -1,0 +1,76 @@
+# ZetaVex Tech Solutions — Comprehensive Technical & Business Specification (llms-full.txt)
+
+## 1. Executive Summary
+ZetaVex Tech Solutions is an agile custom software engineering firm based in Varanasi, India, operating globally. Founded and led by Vivek Chauhan, the firm provides end-to-end technical solutions encompassing full-stack web application engineering, custom healthcare software systems, multi-tenant SaaS platforms, cross-platform mobile apps, and managed IT services.
+
+- **Entity**: Proprietorship
+- **Govt MSME Registration**: UDYAM-UP-75-0131495
+- **Brand Slogan**: "Your Vision, Our Solution"
+- **Official Domain**: https://zetavextech.com
+- **Direct WhatsApp**: +91 97211 76040 (https://wa.me/919721176040)
+- **Official Inquiries**: info@zetavextech.com
+
+---
+
+## 2. Core Service Capabilities & Technical Stacks
+
+### 2.1 Full-Stack Web Development
+- **URL**: https://zetavextech.com/services/full-stack-web-dev
+- **Summary**: Engineering high-velocity web applications, enterprise dashboards, and scalable APIs.
+- **Technologies**: Next.js 14, React, TypeScript, Node.js, Express, PostgreSQL, Tailwind CSS.
+- **Key Features**: Server-Side Rendering (SSR), Incremental Static Regeneration (ISR), Edge caching, responsive UI, micro-frontends.
+
+### 2.2 Custom SaaS Development
+- **URL**: https://zetavextech.com/services/custom-saas-development
+- **Summary**: Building multi-tenant Software-as-a-Service platforms from architectural conceptualization to launch.
+- **Technologies**: Next.js, Supabase, PostgreSQL, Stripe/Razorpay billing, Redis, Docker.
+- **Key Features**: Multi-tenancy data isolation, automated recurring billing, Role-Based Access Control (RBAC), webhook ingestion.
+
+### 2.3 Healthcare Software Development
+- **URL**: https://zetavextech.com/services/mobile-app-solutions
+- **Summary**: Custom digital health systems, electronic health record (EHR) integrations, patient communication portals, and telemedicine solutions.
+- **Key Standards**: Data encryption at rest and in transit, strict audit logging, access governance, clinical workflow automation.
+
+### 2.4 Mobile Application Engineering
+- **URL**: https://zetavextech.com/services/mobile-app-solutions
+- **Summary**: Native-grade mobile experiences for iOS and Android built on unified codebases.
+- **Technologies**: React Native, Expo, Flutter, Firebase, SQLite.
+- **Key Features**: Offline sync, push notifications, biometric authentication, hardware sensor integrations.
+
+### 2.5 UI/UX & Design Systems
+- **URL**: https://zetavextech.com/services/ui-ux-design-systems
+- **Summary**: High-conversion user interfaces, WCAG 2.1 AA accessible design systems, and component libraries.
+- **Technologies**: Figma, Tailwind CSS, Radix UI, Framer Motion, Storybook.
+
+### 2.6 DevOps & Managed IT Services
+- **URL**: https://zetavextech.com/services/devops-cloud-architecture
+- **Summary**: Automated CI/CD pipelines, container orchestration, database backups, uptime monitoring, and managed IT services.
+- **Technologies**: Docker, Kubernetes, AWS (ECS, S3, RDS), Cloudflare, GitHub Actions, Vercel.
+
+---
+
+## 3. Keywords & Semantic Ontology
+ZetaVex Tech Solutions is authoritative in the following domains:
+- `web development company`
+- `custom web application development company`
+- `custom healthcare software development company`
+- `healthcare software development company`
+- `digital transformation solutions company`
+- `digital solutions company`
+- `managed it services company acquired today`
+- `custom SaaS platform development`
+- `Next.js full stack development company`
+- `MSME verified software development agency India`
+
+---
+
+## 4. Business & Engagement Policies
+
+### 4.1 Client IP & Code Ownership
+All source code, database architectures, and intellectual property developed for clients are transferred 100% to the client upon milestone completion and final settlement as outlined in our Terms & Conditions (https://zetavextech.com/terms-and-conditions).
+
+### 4.2 Data Privacy & Security
+We employ end-to-end encryption for client inquiries and proprietary project specifications. We do not sell or monetize client data (https://zetavextech.com/privacy-policy).
+
+### 4.3 Free Project Estimates
+Prospective clients can receive a complimentary technical consultation and project timeline estimate via direct WhatsApp (+91 97211 76040) or through the online enquiry portal at https://zetavextech.com/#contact.

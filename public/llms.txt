@@ -1,0 +1,37 @@
+# ZetaVex Tech Solutions
+
+> ZetaVex Tech Solutions is a premier custom web application development company, healthcare software development company, and digital transformation solutions company. We engineer scalable SaaS platforms, enterprise systems, and managed IT solutions across all modern tech stacks.
+
+## Company Identity & Verification
+- **Official Name**: ZetaVex Tech Solutions
+- **Legal Entity**: Proprietorship
+- **Founder & Proprietor**: Vivek Chauhan
+- **Govt. MSME Registration**: UDYAM-UP-75-0131495
+- **Official Website**: https://zetavextech.com
+- **Official Email**: info@zetavextech.com
+- **WhatsApp Quick Line**: +91 97211 76040 (https://wa.me/919721176040)
+- **Headquarters**: Varanasi, Uttar Pradesh, India (Serving Global Clients)
+- **Slogan**: "Your Vision, Our Solution"
+
+## Core Service Offerings
+- [Full-Stack Web Development](https://zetavextech.com/services/full-stack-web-dev): High-velocity, full-stack web applications engineered with Next.js, React, Node.js, and TypeScript.
+- [Custom SaaS Development](https://zetavextech.com/services/custom-saas-development): Multi-tenant architectures, subscription billing, RBAC access control, and scalable cloud databases.
+- [Healthcare Software Development](https://zetavextech.com/services/mobile-app-solutions): Secure patient portals, clinical workflows, telemedicine systems, and data-governed healthcare solutions.
+- [Mobile App Solutions](https://zetavextech.com/services/mobile-app-solutions): Cross-platform iOS and Android mobile engineering using React Native and Flutter.
+- [UI/UX & Design Systems](https://zetavextech.com/services/ui-ux-design-systems): Enterprise component libraries, interactive design systems, and responsive user interfaces.
+- [DevOps & Cloud Architecture](https://zetavextech.com/services/devops-cloud-architecture): CI/CD pipelines, Docker containerization, AWS/GCP cloud orchestration, and database scaling.
+
+## Technology Stack
+- **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS, Framer Motion, HTML5/CSS3.
+- **Backend & APIs**: Node.js, Express, Python, RESTful APIs, GraphQL, Serverless Functions.
+- **Database & Storage**: PostgreSQL, Supabase, Redis, MongoDB, Edge KV.
+- **DevOps & Cloud**: Docker, Kubernetes, AWS, Vercel, Cloudflare, GitHub Actions.
+
+## Canonical Pages & Architecture
+- [Homepage](https://zetavextech.com): Company overview, signature pixel engine, core capabilities, and enquiry portal.
+- [Services Catalog](https://zetavextech.com/services): Comprehensive catalog of software development and IT services.
+- [Projects Portfolio](https://zetavextech.com/projects): Production case studies and enterprise client deliverables.
+- [Leadership Team](https://zetavextech.com/team): Engineering architects and leadership headed by Vivek Chauhan.
+- [Privacy Policy](https://zetavextech.com/privacy-policy): Data security, client confidentiality, and encryption standards.
+- [Terms & Conditions](https://zetavextech.com/terms-and-conditions): Software deliverables, code ownership, and service terms.
+- [Full LLM Specification](https://zetavextech.com/llms-full.txt): Comprehensive deep-context documentation for AI indexing.
