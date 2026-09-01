@@ -1,14 +1,21 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ClientReview } from '@/lib/types';
-import { Sparkles, Star, Quote, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Star, Quote, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ReviewsSectionProps {
   initialReviews: ClientReview[];
+  limit?: number;
 }
 
-export default function ReviewsSection({ initialReviews }: ReviewsSectionProps) {
+export default function ReviewsSection({ initialReviews, limit }: ReviewsSectionProps) {
+  const [showAll, setShowAll] = useState(false);
+
+  const displayedReviews = limit && !showAll 
+    ? initialReviews.slice(0, limit) 
+    : initialReviews;
+
   return (
     <section id="reviews" className="py-20 sm:py-24 bg-[#F4F1EA]/60 relative scroll-mt-16 border-t border-[#EBE8E1]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -27,58 +34,79 @@ export default function ReviewsSection({ initialReviews }: ReviewsSectionProps) 
         </div>
 
         {/* Reviews Grid: 2 columns on mobile, 3 columns on desktop */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-          {initialReviews.map((review, index) => (
-            <div
-              key={review.id || index}
-              className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 lg:p-8 border border-[#EBE8E1] hover:border-[#FF5500]/30 transition-all duration-300 shadow-xs hover:shadow-lg flex flex-col justify-between"
-            >
-              <div>
-                {/* Rating Stars & Quote Icon */}
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                          i < review.rating
-                            ? 'fill-[#FF5500] text-[#FF5500]'
-                            : 'fill-[#EBE8E1] text-[#EBE8E1]'
-                        }`}
-                      />
-                    ))}
+        {displayedReviews.length === 0 ? (
+          <div className="w-full py-16 text-center bg-white rounded-3xl border border-[#EBE8E1] p-8 shadow-xs">
+            <Quote className="w-10 h-10 text-[#A8A29E] mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#1C1917]">Client Endorsements</h3>
+            <p className="text-xs text-[#78716C] mt-1">Client reviews and case endorsements are being curated.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+            {displayedReviews.map((review, index) => (
+              <div
+                key={review.id || index}
+                className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 lg:p-8 border border-[#EBE8E1] hover:border-[#FF5500]/30 transition-all duration-300 shadow-xs hover:shadow-lg flex flex-col justify-between"
+              >
+                <div>
+                  {/* Rating Stars & Quote Icon */}
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                            i < review.rating
+                              ? 'fill-[#FF5500] text-[#FF5500]'
+                              : 'fill-[#EBE8E1] text-[#EBE8E1]'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <Quote className="w-4 h-4 sm:w-6 sm:h-6 text-[#DCD8CF]" />
                   </div>
-                  <Quote className="w-4 h-4 sm:w-6 sm:h-6 text-[#DCD8CF]" />
-                </div>
 
-                {/* Review Text */}
-                <p className="text-[11px] sm:text-sm lg:text-base text-[#44403C] italic leading-relaxed mb-4 sm:mb-6 line-clamp-3 sm:line-clamp-4">
-                  &ldquo;{review.quote}&rdquo;
-                </p>
-              </div>
-
-              {/* Author Details */}
-              <div className="pt-3.5 sm:pt-5 border-t border-[#EBE8E1] flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-[#FF5500] to-[#FF3366] text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-xs shrink-0">
-                  {review.client_name.charAt(0)}
-                </div>
-                <div className="overflow-hidden">
-                  <div className="flex items-center gap-1">
-                    <h4 className="text-xs sm:text-sm font-bold text-[#0A0A0B] truncate">
-                      {review.client_name}
-                    </h4>
-                    <span title="Verified Client">
-                      <CheckCircle2 className="w-3 h-3 text-[#10B981] shrink-0" />
-                    </span>
-                  </div>
-                  <p className="text-[10px] sm:text-xs text-[#78716C] truncate">
-                    {review.company_name}
+                  {/* Review Text */}
+                  <p className="text-[11px] sm:text-sm lg:text-base text-[#44403C] italic leading-relaxed mb-4 sm:mb-6 line-clamp-3 sm:line-clamp-4">
+                    &ldquo;{review.quote}&rdquo;
                   </p>
                 </div>
+
+                {/* Author Details */}
+                <div className="pt-3.5 sm:pt-5 border-t border-[#EBE8E1] flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-[#FF5500] to-[#FF3366] text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-xs shrink-0">
+                    {review.client_name.charAt(0)}
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="flex items-center gap-1">
+                      <h4 className="text-xs sm:text-sm font-bold text-[#0A0A0B] truncate">
+                        {review.client_name}
+                      </h4>
+                      <span title="Verified Client">
+                        <CheckCircle2 className="w-3 h-3 text-[#10B981] shrink-0" />
+                      </span>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-[#78716C] truncate">
+                      {review.company_name}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Expand / View All More Reviews Button */}
+        {limit && initialReviews.length > limit && (
+          <div className="mt-8 sm:mt-10 flex items-center justify-center">
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold text-[#1C1917] bg-white hover:bg-[#EBE8E1] border border-[#DCD8CF] rounded-xl shadow-xs transition-all"
+            >
+              <span>{showAll ? 'Show Fewer Reviews' : `Click to View More Reviews (${initialReviews.length})`}</span>
+              {showAll ? <ChevronUp className="w-4 h-4 text-[#FF5500]" /> : <ChevronDown className="w-4 h-4 text-[#FF5500]" />}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

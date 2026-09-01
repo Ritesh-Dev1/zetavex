@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Service } from '@/lib/types';
 import { COMPANY_INFO } from '@/lib/constants';
 import { 
@@ -16,7 +17,9 @@ import {
   Check, 
   ArrowRight, 
   Sparkles, 
-  MessageSquare 
+  MessageSquare,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -33,15 +36,21 @@ const iconMap: Record<string, React.ElementType> = {
 
 interface ServicesSectionProps {
   initialServices: Service[];
+  limit?: number;
 }
 
-export default function ServicesSection({ initialServices }: ServicesSectionProps) {
+export default function ServicesSection({ initialServices, limit }: ServicesSectionProps) {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const getIcon = (name: string) => {
     const IconComponent = iconMap[name] || Code;
     return <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-[#FF5500]" />;
   };
+
+  const displayedServices = limit && !showAll 
+    ? initialServices.slice(0, limit) 
+    : initialServices;
 
   return (
     <section id="services" className="py-20 sm:py-24 bg-[#FAF8F5] relative scroll-mt-16">
@@ -61,64 +70,92 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
         </div>
 
         {/* Services Grid: 2 columns on mobile, 3 columns on desktop */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-          {initialServices.map((service, index) => (
-            <div
-              key={service.id || index}
-              className="group relative bg-[#F4F1EA]/60 hover:bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-7 lg:p-8 border border-[#EBE8E1] hover:border-[#FF5500]/40 transition-all duration-300 shadow-xs hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between"
-            >
-              <div>
-                {/* Icon & Index Badge */}
-                <div className="flex items-center justify-between mb-3.5 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white group-hover:bg-[#FF5500]/10 border border-[#EBE8E1] group-hover:border-[#FF5500]/20 flex items-center justify-center transition-colors">
-                    {getIcon(service.icon_name)}
+        {displayedServices.length === 0 ? (
+          <div className="w-full py-16 text-center bg-white rounded-3xl border border-[#EBE8E1] p-8 shadow-xs">
+            <Code className="w-10 h-10 text-[#A8A29E] mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#1C1917]">Services Catalog</h3>
+            <p className="text-xs text-[#78716C] mt-1">Our engineering services catalog is being updated.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+            {displayedServices.map((service, index) => (
+              <div
+                key={service.id || index}
+                className="group relative bg-[#F4F1EA]/60 hover:bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-7 lg:p-8 border border-[#EBE8E1] hover:border-[#FF5500]/40 transition-all duration-300 shadow-xs hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between"
+              >
+                <div>
+                  {/* Icon & Index Badge */}
+                  <div className="flex items-center justify-between mb-3.5 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white group-hover:bg-[#FF5500]/10 border border-[#EBE8E1] group-hover:border-[#FF5500]/20 flex items-center justify-center transition-colors">
+                      {getIcon(service.icon_name)}
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-mono font-bold text-[#A8A29E] bg-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-[#EBE8E1]">
+                      0{index + 1}
+                    </span>
                   </div>
-                  <span className="text-[10px] sm:text-xs font-mono font-bold text-[#A8A29E] bg-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-[#EBE8E1]">
-                    0{index + 1}
-                  </span>
+
+                  {/* Title */}
+                  <h3 className="text-sm sm:text-lg lg:text-xl font-black text-[#0A0A0B] mb-2 sm:mb-3 group-hover:text-[#FF5500] transition-colors leading-snug">
+                    {service.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-[11px] sm:text-sm text-[#57534E] leading-relaxed mb-4 sm:mb-6 line-clamp-2 sm:line-clamp-3">
+                    {service.description}
+                  </p>
                 </div>
 
-                {/* Title */}
-                <h3 className="text-sm sm:text-lg lg:text-xl font-black text-[#0A0A0B] mb-2 sm:mb-3 group-hover:text-[#FF5500] transition-colors leading-snug">
-                  {service.title}
-                </h3>
+                <div>
+                  {/* Tech Tags */}
+                  <div className="flex flex-wrap gap-1 mb-4 sm:mb-6">
+                    {service.tech_tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-xs font-semibold bg-white text-[#44403C] rounded-md sm:rounded-lg border border-[#EBE8E1]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {service.tech_tags.length > 3 && (
+                      <span className="text-[9px] sm:text-xs font-semibold text-[#A8A29E] self-center">
+                        +{service.tech_tags.length - 3}
+                      </span>
+                    )}
+                  </div>
 
-                {/* Description */}
-                <p className="text-[11px] sm:text-sm text-[#57534E] leading-relaxed mb-4 sm:mb-6 line-clamp-2 sm:line-clamp-3">
-                  {service.description}
-                </p>
-              </div>
-
-              <div>
-                {/* Tech Tags */}
-                <div className="flex flex-wrap gap-1 mb-4 sm:mb-6">
-                  {service.tech_tags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-xs font-semibold bg-white text-[#44403C] rounded-md sm:rounded-lg border border-[#EBE8E1]"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {service.tech_tags.length > 3 && (
-                    <span className="text-[9px] sm:text-xs font-semibold text-[#A8A29E] self-center">
-                      +{service.tech_tags.length - 3}
-                    </span>
-                  )}
+                  {/* CTA Action */}
+                  <button
+                    onClick={() => setSelectedService(service)}
+                    className="w-full flex items-center justify-between px-2.5 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold text-[#1C1917] bg-white group-hover:bg-[#1C1917] group-hover:text-white rounded-lg sm:rounded-xl border border-[#EBE8E1] group-hover:border-[#1C1917] transition-all duration-200"
+                  >
+                    <span>Specs</span>
+                    <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF5500] group-hover:translate-x-1 transition-transform" />
+                  </button>
                 </div>
-
-                {/* CTA Action */}
-                <button
-                  onClick={() => setSelectedService(service)}
-                  className="w-full flex items-center justify-between px-2.5 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold text-[#1C1917] bg-white group-hover:bg-[#1C1917] group-hover:text-white rounded-lg sm:rounded-xl border border-[#EBE8E1] group-hover:border-[#1C1917] transition-all duration-200"
-                >
-                  <span>Specs</span>
-                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF5500] group-hover:translate-x-1 transition-transform" />
-                </button>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Expand / View All More Services Button */}
+        {limit && initialServices.length > limit && (
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold text-[#1C1917] bg-white hover:bg-[#EBE8E1] border border-[#DCD8CF] rounded-xl shadow-xs transition-all"
+            >
+              <span>{showAll ? 'Show Fewer Services' : `Click to View More Services (${initialServices.length})`}</span>
+              {showAll ? <ChevronUp className="w-4 h-4 text-[#FF5500]" /> : <ChevronDown className="w-4 h-4 text-[#FF5500]" />}
+            </button>
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-1.5 px-5 py-3 text-xs sm:text-sm font-bold text-[#FF5500] hover:text-[#e04b00] transition-colors"
+            >
+              <span>Explore All Catalog</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
 
         {/* Bottom Banner */}
         <div className="mt-12 sm:mt-16 bg-[#1C1917] rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-[#292524] shadow-lg">
@@ -144,67 +181,59 @@ export default function ServicesSection({ initialServices }: ServicesSectionProp
 
       {/* Service Detail Modal */}
       {selectedService && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#FAF8F5] rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-[#EBE8E1] shadow-2xl relative">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white border border-[#EBE8E1] flex items-center justify-center">
-                  {getIcon(selectedService.icon_name)}
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-[#0A0A0B]">
-                    {selectedService.title}
-                  </h3>
-                  <span className="text-xs font-mono text-[#78716C] uppercase">
-                    Specification Sheet
-                  </span>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 border border-[#EBE8E1] shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-[#FF5500]/10 flex items-center justify-center">
+                {getIcon(selectedService.icon_name)}
               </div>
               <button
                 onClick={() => setSelectedService(null)}
-                className="w-8 h-8 rounded-full bg-[#EBE8E1] hover:bg-[#DCD8CF] flex items-center justify-center text-sm font-bold text-[#1C1917]"
+                className="text-xs font-bold text-[#78716C] hover:text-[#1C1917] bg-[#F4F1EA] px-3 py-1.5 rounded-full"
               >
-                ✕
+                Close
               </button>
             </div>
 
-            <p className="text-sm text-[#44403C] leading-relaxed my-4">
+            <h3 className="text-xl font-black text-[#0A0A0B] mb-3">
+              {selectedService.title}
+            </h3>
+            <p className="text-sm text-[#57534E] leading-relaxed mb-6">
               {selectedService.description}
             </p>
 
             <div className="mb-6">
-              <h5 className="text-xs font-bold uppercase tracking-wider text-[#78716C] mb-2">
-                Included Technologies &amp; Tooling
-              </h5>
-              <div className="flex flex-wrap gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#78716C] block mb-2">
+                Tech Stack &amp; Frameworks
+              </span>
+              <div className="flex flex-wrap gap-1.5">
                 {selectedService.tech_tags.map((tag) => (
                   <span
                     key={tag}
-                    className="flex items-center gap-1 px-3 py-1 text-xs font-bold bg-[#F4F1EA] text-[#1C1917] rounded-lg border border-[#DCD8CF]"
+                    className="px-2.5 py-1 text-xs font-semibold bg-[#F4F1EA] text-[#1C1917] rounded-lg border border-[#EBE8E1]"
                   >
-                    <Check className="w-3 h-3 text-[#10B981]" />
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-4 border-t border-[#EBE8E1]">
+            <div className="flex items-center gap-3">
               <a
-                href={`https://wa.me/919721176040?text=Hi%20ZetaVex%2C%20I%20am%20interested%20in%20your%20${encodeURIComponent(selectedService.title)}%20service.`}
+                href={COMPANY_INFO.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold text-white bg-gradient-to-r from-[#FF5500] to-[#FF3366] rounded-xl shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-gradient-to-r from-[#FF5500] to-[#FF3366] rounded-xl shadow-md hover:opacity-95"
               >
                 <MessageSquare className="w-4 h-4 fill-white" />
-                <span>Request Project Scope</span>
+                <span>Discuss Requirements</span>
               </a>
-              <button
-                onClick={() => setSelectedService(null)}
-                className="px-5 py-3 text-sm font-semibold text-[#57534E] hover:bg-[#F4F1EA] rounded-xl border border-[#EBE8E1]"
+              <Link
+                href={`/services/${selectedService.slug}`}
+                className="px-4 py-3 text-xs font-bold text-[#1C1917] bg-[#F4F1EA] hover:bg-[#EBE8E1] rounded-xl transition-colors border border-[#DCD8CF]"
               >
-                Close
-              </button>
+                Full Spec
+              </Link>
             </div>
           </div>
         </div>
