@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getAdminSessionFromCookies } from '@/lib/auth';
 import { 
   getAllServices, 
@@ -19,7 +20,6 @@ export async function GET(req: NextRequest) {
 
   const session = getAdminSessionFromCookies();
   if (!session) {
-    // Also allow public fetch for homepage SSR
     const services = await getActiveServices();
     return NextResponse.json({ services });
   }
@@ -54,6 +54,10 @@ export async function POST(req: NextRequest) {
       status: status || 'active',
     });
 
+    revalidatePath('/');
+    revalidatePath('/services');
+    revalidatePath(`/services/${generatedSlug}`);
+
     return NextResponse.json({ success: true, service });
   } catch (error: any) {
     console.error('Create service error:', error);
@@ -80,6 +84,10 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Service not found.' }, { status: 404 });
     }
 
+    revalidatePath('/');
+    revalidatePath('/services');
+    if (updated.slug) revalidatePath(`/services/${updated.slug}`);
+
     return NextResponse.json({ success: true, service: updated });
   } catch (error: any) {
     console.error('Update service error:', error);
@@ -102,6 +110,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     const success = await deleteService(id);
+    revalidatePath('/');
+    revalidatePath('/services');
+
     return NextResponse.json({ success });
   } catch (error: any) {
     console.error('Delete service error:', error);

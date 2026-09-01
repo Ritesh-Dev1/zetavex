@@ -24,7 +24,6 @@ export default function Header() {
     { label: 'Services', href: '/services' },
     { label: 'Projects', href: '/projects' },
     { label: 'Team', href: '/team' },
-    { label: 'Reviews', href: '/#reviews' },
     { label: 'Contact', href: '/#contact' },
   ];
 
@@ -38,7 +37,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Logo & Brand */}
+          {/* Logo & Brand (Clean ZetaVex without gap) */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative flex items-center justify-center w-11 h-11 rounded-full overflow-hidden shadow-sm transition-transform duration-300 group-hover:scale-105 border border-[#EBE8E1]">
               <img
@@ -48,10 +47,10 @@ export default function Header() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-[#0A0A0B] flex items-center gap-1">
+              <span className="text-xl font-black tracking-tight text-[#0A0A0B] inline-block leading-none">
                 Zeta<span className="text-[#FF5500]">Vex</span>
               </span>
-              <span className="text-[10px] font-bold tracking-widest text-[#78716C] uppercase -mt-1">
+              <span className="text-[10px] font-bold tracking-widest text-[#78716C] uppercase mt-0.5">
                 Tech Solutions
               </span>
             </div>
@@ -77,7 +76,7 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Action CTAs (Admin Portal button removed from public header) */}
+          {/* Action CTAs */}
           <div className="hidden lg:flex items-center gap-3">
             <a
               href={COMPANY_INFO.whatsappUrl}

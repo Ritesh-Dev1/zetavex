@@ -13,28 +13,29 @@ import Link from 'next/link';
 import { Sparkles, MessageSquare, ArrowRight, Home, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 0;
+export const revalidate = 3600; // Static Edge ISR Caching
 
 export const metadata: Metadata = {
-  title: 'Custom Web Application & Healthcare Software Development Services',
+  title: 'Web & Custom Healthcare Software Services | ZetaVex',
   description:
-    'Explore enterprise services from ZetaVex Tech Solutions — a premier web development company and custom healthcare software development company delivering SaaS platforms, digital transformation solutions, and managed IT services.',
+    'Explore custom web application development, healthcare software engineering, SaaS platforms, and managed IT services across all modern tech stacks.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/services`,
   },
   openGraph: {
-    title: 'Custom Web Application & Healthcare Software Development Services | ZetaVex',
+    title: 'Web & Healthcare Software Services | ZetaVex',
     description:
-      'Explore enterprise services from ZetaVex Tech Solutions — custom web application development, healthcare software engineering, SaaS platforms, and digital transformation solutions.',
+      'Explore custom web application development, healthcare software engineering, SaaS platforms, and managed IT services across all modern tech stacks.',
     url: `${SITE_URL}/services`,
     type: 'website',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Services' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Custom Web Application & Healthcare Software Development Services | ZetaVex',
-    description: 'Enterprise web development, healthcare software, and digital transformation solutions.',
+    title: 'Web & Healthcare Software Services | ZetaVex',
+    description:
+      'Explore custom web application development, healthcare software engineering, SaaS platforms, and managed IT services across all modern tech stacks.',
     images: ['/logo.png'],
   },
 };
@@ -51,7 +52,7 @@ export default async function ServicesPage() {
   const servicesListSchema = getServicesListSchema();
 
   return (
-    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B] overflow-x-hidden w-full max-w-full">
       <JsonLd data={[breadcrumbSchema, servicesListSchema]} />
       <Header />
 

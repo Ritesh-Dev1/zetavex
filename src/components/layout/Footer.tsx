@@ -35,10 +35,10 @@ export default function Footer() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-white flex items-center gap-1">
+                <span className="text-xl font-black tracking-tight text-white inline-block leading-none">
                   Zeta<span className="text-[#FF5500]">Vex</span>
                 </span>
-                <span className="text-[10px] font-bold tracking-widest text-[#A8A29E] uppercase">
+                <span className="text-[10px] font-bold tracking-widest text-[#A8A29E] uppercase mt-0.5">
                   Tech Solutions
                 </span>
               </div>
@@ -76,7 +76,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Navigation */}
+          {/* Quick Navigation (Review button removed) */}
           <div>
             <h3 className="text-xs font-bold tracking-widest text-[#A8A29E] uppercase mb-4">
               Navigation
@@ -93,9 +93,6 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/team" className="hover:text-[#FF5500] transition-colors">Leadership &amp; Team</Link>
-              </li>
-              <li>
-                <Link href="/#reviews" className="hover:text-[#FF5500] transition-colors">Client Reviews</Link>
               </li>
               <li>
                 <Link href="/#contact" className="hover:text-[#FF5500] transition-colors">Contact Us</Link>

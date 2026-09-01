@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getAdminSessionFromCookies } from '@/lib/auth';
 import { 
   getAllTeamMembers, 
@@ -52,6 +53,9 @@ export async function POST(req: NextRequest) {
       status: status || 'active',
     });
 
+    revalidatePath('/');
+    revalidatePath('/team');
+
     return NextResponse.json({ success: true, member });
   } catch (error: any) {
     console.error('Create team member error:', error);
@@ -78,6 +82,9 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Team member not found.' }, { status: 404 });
     }
 
+    revalidatePath('/');
+    revalidatePath('/team');
+
     return NextResponse.json({ success: true, member: updated });
   } catch (error: any) {
     console.error('Update team member error:', error);
@@ -100,6 +107,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     const success = await deleteTeamMember(id);
+    revalidatePath('/');
+    revalidatePath('/team');
+
     return NextResponse.json({ success });
   } catch (error: any) {
     console.error('Delete team member error:', error);

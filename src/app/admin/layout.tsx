@@ -17,7 +17,8 @@ import {
   X,
   Database,
   CheckCircle,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -30,13 +31,80 @@ export default function AdminLayout({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const isAuthPage = pathname.includes('/admin/login');
+
+  useEffect(() => {
+    if (isAuthPage) {
+      setCheckingAuth(false);
+      return;
+    }
+
+    let isMounted = true;
+    async function verifyAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          throw new Error('Unauthenticated');
+        }
+        const data = await res.json();
+        if (data.authenticated) {
+          if (isMounted) {
+            setIsAuthenticated(true);
+            setCheckingAuth(false);
+          }
+        } else {
+          throw new Error('Not authenticated');
+        }
+      } catch (err) {
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setCheckingAuth(false);
+          router.replace('/admin/login');
+        }
+      }
+    }
+
+    verifyAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname, isAuthPage, router]);
 
   if (isAuthPage) {
     return (
       <div className="min-h-screen bg-[#1C1917] text-white flex flex-col justify-center items-center p-4">
         {children}
+      </div>
+    );
+  }
+
+  // Loading/checking authentication state
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-[#0C0A09] text-white flex flex-col items-center justify-center p-6 gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#1C1917] border border-[#292524] flex items-center justify-center text-[#FF5500] shadow-md animate-pulse">
+          <Lock className="w-6 h-6" />
+        </div>
+        <div className="flex items-center gap-2 text-xs font-mono text-[#A8A29E]">
+          <span className="w-3 h-3 border-2 border-[#FF5500] border-t-transparent rounded-full animate-spin" />
+          <span>Verifying Admin Authorization...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If unauthenticated, render redirecting placeholder
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0C0A09] text-white flex flex-col items-center justify-center p-6 gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-red-950/40 border border-red-800/40 flex items-center justify-center text-red-400">
+          <Lock className="w-6 h-6" />
+        </div>
+        <p className="text-sm font-bold text-red-400">Access Denied. Redirecting to Login...</p>
       </div>
     );
   }
@@ -80,7 +148,7 @@ export default function AdminLayout({
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-[#1C1917] border-r border-[#292524] p-5 shrink-0 justify-between">
         <div className="flex flex-col gap-6">
-          {/* Logo & Brand */}
+          {/* Logo & Brand (Clean ZetaVex without gap) */}
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full overflow-hidden border border-[#44403C] shadow-sm shrink-0">
               <img
@@ -90,7 +158,7 @@ export default function AdminLayout({
               />
             </div>
             <div>
-              <span className="text-lg font-black tracking-tight flex items-center gap-1">
+              <span className="text-lg font-black tracking-tight flex items-center">
                 Zeta<span className="text-[#FF5500]">Vex</span>
               </span>
               <span className="text-[10px] font-mono text-[#A8A29E] uppercase tracking-widest block -mt-1">

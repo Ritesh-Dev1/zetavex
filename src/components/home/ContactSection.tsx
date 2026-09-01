@@ -100,9 +100,9 @@ export default function ContactSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Left Column: Direct Contact & Verified Business Card */}
-          <div className="lg:col-span-5 flex flex-col justify-between bg-[#1C1917] text-white rounded-3xl p-8 sm:p-10 border border-[#292524] shadow-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12">
+          {/* Left Column (Desktop) / Bottom Column (Mobile): Direct Contact & Verified Business Card */}
+          <div className="order-2 lg:order-1 lg:col-span-5 flex flex-col justify-between bg-[#1C1917] text-white rounded-3xl p-6 sm:p-10 border border-[#292524] shadow-xl">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-14 h-14 rounded-full overflow-hidden shadow-sm border border-[#44403C] shrink-0">
@@ -196,8 +196,8 @@ export default function ContactSection() {
             </div>
           </div>
 
-          {/* Right Column: Contact & Enquiry Form */}
-          <div className="lg:col-span-7 bg-white rounded-3xl p-8 sm:p-10 border border-[#EBE8E1] shadow-sm">
+          {/* Right Column (Desktop) / Top Column (Mobile): Contact & Enquiry Form */}
+          <div className="order-1 lg:order-2 lg:col-span-7 bg-white rounded-3xl p-6 sm:p-10 border border-[#EBE8E1] shadow-sm">
             <h3 className="text-2xl font-black text-[#0A0A0B] mb-2">
               Send an Enquiry
             </h3>

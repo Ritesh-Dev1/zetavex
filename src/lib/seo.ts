@@ -22,10 +22,10 @@ export const PRIMARY_KEYWORDS = [
 ];
 
 export const DEFAULT_SEO = {
-  title: 'ZetaVex Tech Solutions — Web & Custom Healthcare Software Development Company',
-  titleTemplate: '%s | ZetaVex Tech Solutions',
+  title: 'ZetaVex Tech Solutions — Web & Healthcare Software',
+  titleTemplate: '%s | ZetaVex',
   description:
-    'ZetaVex Tech Solutions is a premier custom web application development company, healthcare software development company, and digital transformation solutions company. We deliver scalable SaaS platforms, enterprise systems, and managed IT solutions across all modern tech stacks.',
+    'ZetaVex Tech Solutions is a premier custom web application & healthcare software development company delivering digital transformation solutions.',
   keywords: PRIMARY_KEYWORDS,
   siteName: 'ZetaVex Tech Solutions',
   locale: 'en_US',
@@ -33,6 +33,14 @@ export const DEFAULT_SEO = {
   logoUrl: `${SITE_URL}/logo.png`,
   ogImageUrl: `${SITE_URL}/logo.png`,
 };
+
+export function getGoogleSiteVerification(): string | undefined {
+  const raw = process.env.GOOGLE_SITE_VERIFICATION || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  if (!raw) return undefined;
+  // Auto-sanitize if admin pasted full <meta name="google-site-verification" content="..." />
+  const match = raw.match(/content=["']([^"']+)["']/i);
+  return match ? match[1] : raw.trim();
+}
 
 // ==============================================================================
 // SCHEMA.ORG JSON-LD GENERATORS

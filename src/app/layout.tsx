@@ -6,7 +6,8 @@ import {
   PRIMARY_KEYWORDS, 
   SITE_URL, 
   getOrganizationSchema, 
-  getWebSiteSchema 
+  getWebSiteSchema,
+  getGoogleSiteVerification
 } from '@/lib/seo';
 import JsonLd from '@/components/seo/JsonLd';
 
@@ -17,10 +18,12 @@ const inter = Inter({
   display: 'swap',
 });
 
+const googleCode = getGoogleSiteVerification();
+
 export const metadata: Metadata = {
   title: {
-    default: 'ZetaVex Tech Solutions — Web, SaaS & Healthcare Software Development Company',
-    template: '%s | ZetaVex Tech Solutions',
+    default: 'ZetaVex Tech Solutions — Web & Healthcare Software',
+    template: '%s | ZetaVex',
   },
   description: DEFAULT_SEO.description,
   keywords: PRIMARY_KEYWORDS,
@@ -32,7 +35,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'ZetaVex Tech Solutions — Web, SaaS & Healthcare Software Development Company',
+    title: 'ZetaVex Tech Solutions — Web & Healthcare Software',
     description: DEFAULT_SEO.description,
     url: SITE_URL,
     siteName: DEFAULT_SEO.siteName,
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ZetaVex Tech Solutions — Web, SaaS & Healthcare Software Development Company',
+    title: 'ZetaVex Tech Solutions — Web & Healthcare Software',
     description: DEFAULT_SEO.description,
     images: ['/logo.png'],
   },
@@ -68,6 +71,13 @@ export const metadata: Metadata = {
     icon: '/logo.png',
     apple: '/logo.png',
   },
+  verification: {
+    google: googleCode,
+    other: {
+      ...(googleCode ? { 'google-site-verification': googleCode } : {}),
+      ...(process.env.BING_SITE_VERIFICATION ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } : {}),
+    },
+  },
 };
 
 export default function RootLayout({
@@ -83,10 +93,19 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#FAF8F5" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+        
+        {/* Dynamic Search Engine Verification from .env */}
+        {googleCode && (
+          <meta name="google-site-verification" content={googleCode} />
+        )}
+        {process.env.BING_SITE_VERIFICATION && (
+          <meta name="msvalidate.01" content={process.env.BING_SITE_VERIFICATION} />
+        )}
+
         {/* Global Schema.org JSON-LD */}
         <JsonLd data={[orgSchema, webSiteSchema]} />
       </head>
-      <body className="min-h-screen bg-[#FAF8F5] text-[#0A0A0B] antialiased selection:bg-[#FF5500] selection:text-white">
+      <body className="min-h-screen bg-[#FAF8F5] text-[#0A0A0B] antialiased selection:bg-[#FF5500] selection:text-white overflow-x-hidden w-full max-w-full">
         {children}
       </body>
     </html>

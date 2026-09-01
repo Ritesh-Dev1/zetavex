@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getAdminSessionFromCookies } from '@/lib/auth';
 import { 
   getAllProjects, 
@@ -56,6 +57,9 @@ export async function POST(req: NextRequest) {
       status: status || 'published',
     });
 
+    revalidatePath('/');
+    revalidatePath('/projects');
+
     return NextResponse.json({ success: true, project });
   } catch (error: any) {
     console.error('Create project error:', error);
@@ -82,6 +86,9 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Project not found.' }, { status: 404 });
     }
 
+    revalidatePath('/');
+    revalidatePath('/projects');
+
     return NextResponse.json({ success: true, project: updated });
   } catch (error: any) {
     console.error('Update project error:', error);
@@ -104,6 +111,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     const success = await deleteProject(id);
+    revalidatePath('/');
+    revalidatePath('/projects');
+
     return NextResponse.json({ success });
   } catch (error: any) {
     console.error('Delete project error:', error);

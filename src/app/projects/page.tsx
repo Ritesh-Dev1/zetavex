@@ -13,27 +13,29 @@ import Link from 'next/link';
 import { Sparkles, MessageSquare, ArrowRight, Home, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 0;
+export const revalidate = 3600; // Static Edge ISR Caching
 
 export const metadata: Metadata = {
-  title: 'Production Case Studies & Enterprise Software Portfolio',
+  title: 'Enterprise Software Portfolio & Case Studies | ZetaVex',
   description:
-    'Explore production case studies from ZetaVex Tech Solutions — enterprise web apps, SaaS platforms, healthcare software applications, and digital transformation solutions.',
+    'Explore live enterprise web apps, healthcare software systems, and digital transformation case studies engineered by ZetaVex Tech Solutions.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/projects`,
   },
   openGraph: {
-    title: 'Production Case Studies & Enterprise Software Portfolio | ZetaVex',
-    description: 'Explore live web apps, SaaS platforms, and healthcare software engineered by ZetaVex Tech Solutions.',
+    title: 'Enterprise Software Portfolio & Case Studies | ZetaVex',
+    description:
+      'Explore live enterprise web apps, healthcare software systems, and digital transformation case studies engineered by ZetaVex Tech Solutions.',
     url: `${SITE_URL}/projects`,
     type: 'website',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Projects Portfolio' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Production Case Studies & Enterprise Software Portfolio | ZetaVex',
-    description: 'Enterprise web apps, SaaS platforms, and custom healthcare software case studies.',
+    title: 'Enterprise Software Portfolio & Case Studies | ZetaVex',
+    description:
+      'Explore live enterprise web apps, healthcare software systems, and digital transformation case studies engineered by ZetaVex Tech Solutions.',
     images: ['/logo.png'],
   },
 };
@@ -49,7 +51,7 @@ export default async function ProjectsPage() {
   const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
   return (
-    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B] overflow-x-hidden w-full max-w-full">
       <JsonLd data={breadcrumbSchema} />
       <Header />
 

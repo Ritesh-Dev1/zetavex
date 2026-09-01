@@ -13,27 +13,29 @@ import Link from 'next/link';
 import { Sparkles, MessageSquare, ArrowRight, ShieldCheck, Award, FileBadge, Home, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 0;
+export const revalidate = 3600; // Static Edge ISR Caching
 
 export const metadata: Metadata = {
-  title: 'Leadership & Full-Stack Engineering Team | Vivek Chauhan',
+  title: 'Leadership & Engineering Team | Vivek Chauhan | ZetaVex',
   description:
-    'Meet Founder & Proprietor Vivek Chauhan and the leadership driving architectural excellence at ZetaVex Tech Solutions — a web development and healthcare software development company.',
+    'Meet Founder Vivek Chauhan and the engineering architects driving custom web application and healthcare software development at ZetaVex.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/team`,
   },
   openGraph: {
-    title: 'Leadership & Full-Stack Engineering Team | ZetaVex Tech Solutions',
-    description: 'Meet Founder Vivek Chauhan and the leadership driving ZetaVex Tech Solutions.',
+    title: 'Leadership & Engineering Team | Vivek Chauhan | ZetaVex',
+    description:
+      'Meet Founder Vivek Chauhan and the engineering architects driving custom web application and healthcare software development at ZetaVex.',
     url: `${SITE_URL}/team`,
     type: 'website',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Leadership Team' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Leadership & Full-Stack Engineering Team | ZetaVex Tech Solutions',
-    description: 'Meet Founder Vivek Chauhan and the engineering architects behind ZetaVex Tech Solutions.',
+    title: 'Leadership & Engineering Team | Vivek Chauhan | ZetaVex',
+    description:
+      'Meet Founder Vivek Chauhan and the engineering architects driving custom web application and healthcare software development at ZetaVex.',
     images: ['/logo.png'],
   },
 };
@@ -49,7 +51,7 @@ export default async function TeamPage() {
   const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
   return (
-    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B] overflow-x-hidden w-full max-w-full">
       <JsonLd data={breadcrumbSchema} />
       <Header />
 

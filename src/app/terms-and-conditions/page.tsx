@@ -11,16 +11,17 @@ import { FileText, ArrowLeft, ShieldCheck, Mail, CheckCircle2, Home, ChevronRigh
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions — ZetaVex Tech Solutions',
+  title: 'Terms & Conditions | ZetaVex Tech Solutions',
   description:
-    'Review the Terms and Conditions governing software engineering services, intellectual property, and client engagements with ZetaVex Tech Solutions.',
+    'Review the Terms and Conditions governing custom software development, code ownership, and client engagements with ZetaVex Tech Solutions.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/terms-and-conditions`,
   },
   openGraph: {
     title: 'Terms & Conditions | ZetaVex Tech Solutions',
-    description: 'Terms and conditions governing client software engineering engagements with ZetaVex Tech Solutions.',
+    description:
+      'Review the Terms and Conditions governing custom software development, code ownership, and client engagements with ZetaVex Tech Solutions.',
     url: `${SITE_URL}/terms-and-conditions`,
     type: 'article',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Terms and Conditions' }],
@@ -28,7 +29,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Terms & Conditions | ZetaVex Tech Solutions',
-    description: 'Terms and conditions governing client software engineering engagements with ZetaVex Tech Solutions.',
+    description:
+      'Review the Terms and Conditions governing custom software development, code ownership, and client engagements with ZetaVex Tech Solutions.',
     images: ['/logo.png'],
   },
 };
@@ -42,7 +44,7 @@ export default function TermsAndConditionsPage() {
   const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
   return (
-    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B] overflow-x-hidden w-full max-w-full">
       <JsonLd data={breadcrumbSchema} />
       <Header />
 

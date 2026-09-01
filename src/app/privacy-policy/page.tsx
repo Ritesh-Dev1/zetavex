@@ -11,16 +11,17 @@ import { ShieldCheck, ArrowLeft, Lock, FileText, Mail, MapPin, CheckCircle2, Hom
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — ZetaVex Tech Solutions',
+  title: 'Privacy Policy | ZetaVex Tech Solutions',
   description:
-    'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we protect client data, maintain database security, and comply with data governance.',
+    'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption and strict privacy standards.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/privacy-policy`,
   },
   openGraph: {
     title: 'Privacy Policy | ZetaVex Tech Solutions',
-    description: 'Privacy policy and data governance practices at ZetaVex Tech Solutions.',
+    description:
+      'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption and strict privacy standards.',
     url: `${SITE_URL}/privacy-policy`,
     type: 'article',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Privacy Policy' }],
@@ -28,7 +29,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Privacy Policy | ZetaVex Tech Solutions',
-    description: 'Privacy policy and data governance practices at ZetaVex Tech Solutions.',
+    description:
+      'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption and strict privacy standards.',
     images: ['/logo.png'],
   },
 };
@@ -42,7 +44,7 @@ export default function PrivacyPolicyPage() {
   const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
   return (
-    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B] overflow-x-hidden w-full max-w-full">
       <JsonLd data={breadcrumbSchema} />
       <Header />
 

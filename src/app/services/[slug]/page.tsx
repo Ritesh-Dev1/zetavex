@@ -42,10 +42,20 @@ const iconMap: Record<string, React.ElementType> = {
   Server,
 };
 
+export const revalidate = 3600; // Static Edge ISR Caching
+
 interface ServiceSlugPageProps {
   params: {
     slug: string;
   };
+}
+
+export async function generateStaticParams() {
+  const services = await getActiveServices();
+  const allServices = services.length > 0 ? services : INITIAL_SERVICES;
+  return allServices.map((service) => ({
+    slug: service.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: ServiceSlugPageProps): Promise<Metadata> {
@@ -59,25 +69,28 @@ export async function generateMetadata({ params }: ServiceSlugPageProps): Promis
   }
 
   const canonicalUrl = `${SITE_URL}/services/${service.slug}`;
+  const pageTitle = `${service.title.slice(0, 50)} | ZetaVex`;
+  const rawDesc = service.description.trim();
+  const pageDesc = rawDesc.length > 144 ? `${rawDesc.slice(0, 144)}...` : rawDesc;
 
   return {
-    title: `${service.title} — Custom Web & Healthcare Software Solutions`,
-    description: `${service.description} Engineered by ZetaVex Tech Solutions, a premier custom web application development company and digital solutions company.`,
+    title: pageTitle,
+    description: pageDesc,
     keywords: [...PRIMARY_KEYWORDS, service.title, ...service.tech_tags],
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${service.title} | ZetaVex Tech Solutions`,
-      description: service.description,
+      title: pageTitle,
+      description: pageDesc,
       url: canonicalUrl,
       type: 'article',
       images: [{ url: '/logo.png', width: 800, height: 800, alt: service.title }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${service.title} | ZetaVex Tech Solutions`,
-      description: service.description,
+      title: pageTitle,
+      description: pageDesc,
       images: ['/logo.png'],
     },
   };

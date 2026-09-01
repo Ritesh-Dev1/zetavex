@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { COMPANY_INFO } from '@/lib/constants';
 
 interface Particle {
   x: number;
@@ -12,10 +13,12 @@ interface Particle {
   speed: number;
   opacity: number;
   isWordmark: boolean;
+  delay: number;
 }
 
 export default function PixelGridAssembly() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [assembled, setAssembled] = useState(false);
 
   useEffect(() => {
@@ -25,41 +28,66 @@ export default function PixelGridAssembly() {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || 800);
-    let height = (canvas.height = 240);
+    let width = 0;
+    let height = 0;
+    let particles: Particle[] = [];
+    let mouseX = -1000;
+    let mouseY = -1000;
+    let touchActive = false;
 
-    const handleResize = () => {
-      if (!canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth;
-      height = canvas.height = Math.min(260, Math.max(180, width * 0.28));
+    function setupCanvasDimensions() {
+      if (!canvas || !containerRef.current) return;
+      const isMobile = window.innerWidth < 640;
+      
+      // Calculate responsive display width strictly within parent bounds
+      const parentWidth = containerRef.current.clientWidth || (window.innerWidth - 32);
+      width = Math.max(260, Math.min(parentWidth, 900));
+      height = isMobile ? 105 : 170;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = '100%';
+      canvas.style.maxWidth = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      ctx!.scale(dpr, dpr);
       initParticles();
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    const particles: Particle[] = [];
-    const colors = ['#FF5500', '#FF3366', '#FF8C00', '#1C1917', '#38BDF8', '#10B981'];
+    }
 
     function initParticles() {
-      particles.length = 0;
-      const text = 'INNOVATE · DEVELOP · DELIVER';
+      particles = [];
+      const isMobile = width < 640;
 
-      // Temporary offscreen canvas to sample text pixel positions
+      // Offscreen canvas for precise pixel sampling
       const offCanvas = document.createElement('canvas');
       offCanvas.width = width;
       offCanvas.height = height;
       const offCtx = offCanvas.getContext('2d');
       if (!offCtx) return;
 
-      const fontSize = Math.max(16, Math.min(38, width / 20));
-      offCtx.font = `900 ${fontSize}px Inter, sans-serif`;
-      offCtx.fillStyle = '#FF5500';
+      offCtx.fillStyle = '#000000';
       offCtx.textAlign = 'center';
       offCtx.textBaseline = 'middle';
-      offCtx.fillText(text, width / 2, height / 2);
+
+      if (isMobile) {
+        // Two-line layout for crystal-clear mobile rendering of website slogan
+        const fontSize = Math.max(14, Math.min(20, Math.floor(width / 17)));
+        offCtx.font = `900 ${fontSize}px Inter, -apple-system, sans-serif`;
+        
+        // Line 1: YOUR VISION,
+        offCtx.fillText('YOUR VISION,', width / 2, height / 2 - fontSize * 0.65);
+        // Line 2: OUR SOLUTION
+        offCtx.fillText('OUR SOLUTION', width / 2, height / 2 + fontSize * 0.65);
+      } else {
+        // Single-line layout for desktop and tablet
+        const fontSize = Math.max(18, Math.min(30, Math.floor(width / 24)));
+        offCtx.font = `900 ${fontSize}px Inter, -apple-system, sans-serif`;
+        offCtx.fillText('YOUR VISION · OUR SOLUTION', width / 2, height / 2);
+      }
 
       const imgData = offCtx.getImageData(0, 0, width, height).data;
-      const step = width < 640 ? 5 : 4; // grid sample gap
+      const step = isMobile ? 4 : 4; // grid sample density
 
       for (let y = 0; y < height; y += step) {
         for (let x = 0; x < width; x += step) {
@@ -67,34 +95,39 @@ export default function PixelGridAssembly() {
           const alpha = imgData[index + 3];
 
           if (alpha > 128) {
-            // Scattered starting position
+            // Scattered starting position with auto-write wave delay
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * (width * 0.6) + 100;
+            const distance = Math.random() * (width * 0.35) + 30;
             const startX = width / 2 + Math.cos(angle) * distance;
             const startY = height / 2 + Math.sin(angle) * distance;
 
-            const isAccent = Math.random() > 0.6;
+            const isAccent = Math.random() > 0.45;
             const color = isAccent 
               ? (Math.random() > 0.5 ? '#FF5500' : '#FF3366') 
               : '#1C1917';
+
+            // Wave delay based on horizontal position (auto-writes from left to right)
+            const normalizedX = x / width;
+            const delay = normalizedX * 24 + Math.random() * 8;
 
             particles.push({
               x: startX,
               y: startY,
               targetX: x,
               targetY: y,
-              size: step - 1.2,
+              size: isMobile ? 2.5 : 3.2,
               color,
-              speed: 0.04 + Math.random() * 0.05,
-              opacity: 0.1,
+              speed: 0.06 + Math.random() * 0.04,
+              opacity: 0,
               isWordmark: true,
+              delay,
             });
           }
         }
       }
 
-      // Add a few floating ambient background grid points
-      const ambientCount = 35;
+      // Ambient background floating grid dots
+      const ambientCount = isMobile ? 10 : 22;
       for (let i = 0; i < ambientCount; i++) {
         const tx = Math.random() * width;
         const ty = Math.random() * height;
@@ -103,20 +136,17 @@ export default function PixelGridAssembly() {
           y: Math.random() * height,
           targetX: tx,
           targetY: ty,
-          size: 2.5,
-          color: '#DCD8CF',
-          speed: 0.02,
-          opacity: 0.4,
+          size: 1.6,
+          color: '#EBE8E1',
+          speed: 0.015,
+          opacity: 0.35,
           isWordmark: false,
+          delay: 0,
         });
       }
     }
 
-    initParticles();
-
-    let mouseX = -1000;
-    let mouseY = -1000;
-
+    // Handle mouse events
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouseX = e.clientX - rect.left;
@@ -128,57 +158,106 @@ export default function PixelGridAssembly() {
       mouseY = -1000;
     };
 
+    // Handle touch events on mobile screens
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        touchActive = true;
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.touches[0].clientX - rect.left;
+        mouseY = e.touches[0].clientY - rect.top;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.touches[0].clientX - rect.left;
+        mouseY = e.touches[0].clientY - rect.top;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchActive = false;
+      setTimeout(() => {
+        mouseX = -1000;
+        mouseY = -1000;
+      }, 300);
+    };
+
+    // Resize listener
+    let resizeTimer: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        setupCanvasDimensions();
+      }, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
 
+    setupCanvasDimensions();
+
+    let frameCount = 0;
     const context = ctx;
-    let progress = 0;
+
     function render() {
       if (!context) return;
       context.clearRect(0, 0, width, height);
-      progress += 0.01;
+      frameCount++;
 
       let allSettled = true;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Smooth ease-in-out towards target grid location
-        const dx = p.targetX - p.x;
-        const dy = p.targetY - p.y;
-        p.x += dx * p.speed;
-        p.y += dy * p.speed;
+        if (frameCount > p.delay) {
+          // Smooth physics spring towards target position
+          const dx = p.targetX - p.x;
+          const dy = p.targetY - p.y;
+          p.x += dx * p.speed;
+          p.y += dy * p.speed;
 
-        if (p.opacity < 0.95) {
-          p.opacity += 0.03;
+          if (p.opacity < 0.95) {
+            p.opacity += 0.05;
+          }
+
+          if (Math.abs(dx) > 0.8 || Math.abs(dy) > 0.8) {
+            allSettled = false;
+          }
         }
 
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-          allSettled = false;
-        }
-
-        // Mouse displacement effect
-        const distToMouse = Math.hypot(p.x - mouseX, p.y - mouseY);
+        // Interactive displacement from mouse or touch cursor
         let renderX = p.x;
         let renderY = p.y;
-        if (distToMouse < 60) {
+        const distToCursor = Math.hypot(p.x - mouseX, p.y - mouseY);
+        const repelRadius = width < 640 ? 38 : 55;
+
+        if (distToCursor < repelRadius) {
           const repelAngle = Math.atan2(p.y - mouseY, p.x - mouseX);
-          const force = (60 - distToMouse) / 60;
-          renderX += Math.cos(repelAngle) * force * 20;
-          renderY += Math.sin(repelAngle) * force * 20;
+          const force = (repelRadius - distToCursor) / repelRadius;
+          renderX += Math.cos(repelAngle) * force * (width < 640 ? 12 : 20);
+          renderY += Math.sin(repelAngle) * force * (width < 640 ? 12 : 20);
         }
 
-        context.fillStyle = p.color;
-        context.globalAlpha = p.opacity;
+        // Render pixel block
+        if (p.opacity > 0.01) {
+          context.fillStyle = p.color;
+          context.globalAlpha = p.opacity;
 
-        // Draw pixel rounded square
-        context.beginPath();
-        if (context.roundRect) {
-          context.roundRect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size, 1);
-        } else {
-          context.rect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size);
+          context.beginPath();
+          if (context.roundRect) {
+            context.roundRect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size, 1);
+          } else {
+            context.rect(renderX - p.size / 2, renderY - p.size / 2, p.size, p.size);
+          }
+          context.fill();
         }
-        context.fill();
       }
 
       if (allSettled && !assembled) {
@@ -192,25 +271,36 @@ export default function PixelGridAssembly() {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('orientationchange', handleResize);
+      if (canvas) {
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('mouseleave', handleMouseLeave);
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      }
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center my-2 select-none">
-      <div className="w-full max-w-4xl relative overflow-hidden rounded-2xl bg-[#F4F1EA]/60 border border-[#EBE8E1] p-3 shadow-inner">
-        <div className="absolute top-2 left-3 flex items-center gap-1.5 z-10">
-          <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
-          <span className="text-[10px] font-mono tracking-widest text-[#78716C] uppercase">
-            Signature Pixel Grid Assembly Engine
+    <div ref={containerRef} className="relative w-full max-w-full flex flex-col items-center justify-center my-1 sm:my-3 select-none overflow-hidden">
+      <div className="w-full max-w-full relative overflow-hidden rounded-2xl bg-[#F4F1EA]/70 border border-[#EBE8E1] p-2 sm:p-4 shadow-inner">
+        <div className="flex items-center justify-between gap-2 mb-1 z-10 px-1">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
+            <span className="text-[10px] font-mono tracking-wider text-[#78716C] uppercase font-bold">
+              Signature Pixel Slogan Engine
+            </span>
+          </div>
+          <span className="text-[9px] font-mono text-[#A8A29E] hidden sm:inline">
+            Interactive · Touch &amp; Hover
           </span>
         </div>
         <canvas
           ref={canvasRef}
-          className="w-full cursor-crosshair block"
-          title="Interactive Pixel Grid - Move cursor over wordmark"
+          className="w-full max-w-full cursor-crosshair block touch-none"
+          title="Interactive Pixel Grid - Move cursor or touch to interact"
         />
       </div>
     </div>

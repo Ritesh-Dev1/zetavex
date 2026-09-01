@@ -18,7 +18,7 @@ import {
 import { getServicesListSchema, getBreadcrumbSchema } from '@/lib/seo';
 import JsonLd from '@/components/seo/JsonLd';
 
-export const revalidate = 0; // Dynamic data for live updates from admin
+export const revalidate = 3600; // ISR Static Edge Caching for 0ms CPU & null function invocations
 
 export default async function HomePage() {
   const [services, projects, team, reviews] = await Promise.all([
@@ -34,7 +34,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B]">
+    <main className="relative min-h-screen bg-[#FAF8F5] text-[#0A0A0B] overflow-x-hidden w-full max-w-full">
       {/* Schema.org Structured Data */}
       <JsonLd data={[servicesListSchema, breadcrumbSchema]} />
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getAdminSessionFromCookies } from '@/lib/auth';
 import { 
   getAllReviews, 
@@ -54,6 +55,8 @@ export async function POST(req: NextRequest) {
       is_approved: is_approved !== undefined ? Boolean(is_approved) : true,
     });
 
+    revalidatePath('/');
+
     return NextResponse.json({ success: true, review });
   } catch (error: any) {
     console.error('Create review error:', error);
@@ -75,14 +78,12 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Review ID is required.' }, { status: 400 });
     }
 
-    if (updates.rating) {
-      updates.rating = Math.max(1, Math.min(5, updates.rating));
-    }
-
     const updated = await updateReview(id, updates);
     if (!updated) {
       return NextResponse.json({ error: 'Review not found.' }, { status: 404 });
     }
+
+    revalidatePath('/');
 
     return NextResponse.json({ success: true, review: updated });
   } catch (error: any) {
@@ -106,6 +107,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     const success = await deleteReview(id);
+    revalidatePath('/');
+
     return NextResponse.json({ success });
   } catch (error: any) {
     console.error('Delete review error:', error);
