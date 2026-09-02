@@ -718,7 +718,7 @@ export async function getAdminByEmail(email: string) {
       const { data, error } = await supabaseAdmin
         .from('admin_users')
         .select('*')
-        .ilike('email', normalizedEmail)
+        .eq('email', normalizedEmail)
         .single();
       if (!error && data) return data;
       if (error && error.code !== 'PGRST116') {
@@ -851,3 +851,28 @@ export function isAdminConfiguredInEnv(): boolean {
   const envHash = process.env.ADMIN_PASSWORD_HASH;
   return Boolean(envEmail && (envPass || envHash));
 }
+
+// Seed Database helper for cold start / initial setup
+export async function seedDatabase() {
+  if (supabaseAdmin) {
+    try {
+      const envEmail = (process.env.ADMIN_EMAIL || process.env.ADMIN_INITIAL_EMAIL || 'admin@zetavextech.com').toLowerCase().trim();
+      const envPass = process.env.ADMIN_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD || 'ZetaVex@2026!';
+      const hash = hashPassword(envPass);
+
+      await supabaseAdmin.from('admin_users').upsert({
+        email: envEmail,
+        password_hash: hash,
+        role: 'super_admin',
+        status: 'active',
+      }, { onConflict: 'email' });
+
+      return { success: true, message: 'Database seeded successfully.' };
+    } catch (err: any) {
+      console.error('Seed database error:', err);
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: true, message: 'In-memory database active.' };
+}
+

@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminByEmail, isAdminConfiguredInEnv, supabaseAdmin } from '@/lib/supabase/admin';
 import { verifyPassword, signAdminToken, hashPassword, COOKIE_NAME } from '@/lib/auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { sanitizeText, sanitizeEmail, hasSqlInjectionSignature } from '@/lib/sanitize';
 
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    // Rate limit: Max 15 login attempts per IP per 15 minutes
+    // Rate limit: Max 15 login attempts per IP per 15 minutes to block brute-force attacks
     const rateCheck = await checkRateLimit('admin_login', ip, 15, 15);
     if (!rateCheck.success) {
       return NextResponse.json(
@@ -21,12 +22,20 @@ export async function POST(req: NextRequest) {
     const rawEmail = typeof body.email === 'string' ? body.email : '';
     const rawPassword = typeof body.password === 'string' ? body.password : '';
 
-    const email = rawEmail.trim().toLowerCase();
-    const password = rawPassword.trim();
+    const cleanEmail = sanitizeText(rawEmail).toLowerCase();
+    const cleanPassword = sanitizeText(rawPassword);
 
-    if (!email || !password) {
+    if (!cleanEmail || !cleanPassword) {
       return NextResponse.json(
         { error: 'Email and password are required.' },
+        { status: 400 }
+      );
+    }
+
+    // 🛡️ SQL Injection & Malicious Pattern Guard
+    if (hasSqlInjectionSignature(cleanEmail) || hasSqlInjectionSignature(cleanPassword)) {
+      return NextResponse.json(
+        { error: 'Malicious or invalid characters detected in login request.' },
         { status: 400 }
       );
     }
@@ -37,7 +46,7 @@ export async function POST(req: NextRequest) {
     let authenticatedAdmin: { id: string; email: string; role: 'super_admin' | 'admin' } | null = null;
 
     // 1. MASTER ENVIRONMENT CREDENTIALS CHECK (.env.local / .env / Vercel Envs)
-    if (envEmail && envPass && email === envEmail && password === envPass) {
+    if (envEmail && envPass && cleanEmail === envEmail && cleanPassword === envPass) {
       const passwordHash = hashPassword(envPass);
       authenticatedAdmin = {
         id: 'admin-master-env',
@@ -60,8 +69,8 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
-      // 2. DATABASE CREDENTIALS CHECK (admin_users table in Supabase)
-      const admin = await getAdminByEmail(email);
+      // 2. DATABASE CREDENTIALS CHECK (admin_users table in Supabase via Parameterized Query)
+      const admin = await getAdminByEmail(cleanEmail);
 
       if (!admin) {
         return NextResponse.json(
@@ -77,7 +86,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const isValid = verifyPassword(password, admin.password_hash);
+      const isValid = verifyPassword(cleanPassword, admin.password_hash);
       if (!isValid) {
         return NextResponse.json(
           { error: 'Invalid email or password credentials.' },
@@ -86,8 +95,8 @@ export async function POST(req: NextRequest) {
       }
 
       // If password in DB was stored as plain text, auto-upgrade to bcrypt
-      if (admin.password_hash === password && supabaseAdmin && admin.id && !admin.id.startsWith('admin-env-')) {
-        const newHash = hashPassword(password);
+      if (admin.password_hash === cleanPassword && supabaseAdmin && admin.id && !admin.id.startsWith('admin-env-')) {
+        const newHash = hashPassword(cleanPassword);
         supabaseAdmin.from('admin_users').update({ 
           password_hash: newHash,
           last_login_at: new Date().toISOString()
