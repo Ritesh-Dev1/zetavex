@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createEnquiry } from '@/lib/supabase/admin';
 import { checkRateLimit, getClientIp, hashClientIp } from '@/lib/rate-limit';
+import { sanitizeText, sanitizeEmail, sanitizePhone, hasSqlInjectionSignature } from '@/lib/sanitize';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,17 +20,35 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, email, phone, service_requested, message, terms_accepted } = body;
 
-    if (!name || !name.trim()) {
-      return NextResponse.json({ error: 'Please enter your full name.' }, { status: 400 });
+    const cleanName = sanitizeText(name);
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPhone = sanitizePhone(phone);
+    const cleanService = sanitizeText(service_requested || 'General Consultation');
+    const cleanMessage = sanitizeText(message);
+
+    if (!cleanName || cleanName.length < 2) {
+      return NextResponse.json({ error: 'Please enter a valid full name.' }, { status: 400 });
     }
 
-    if (!email || !email.includes('@')) {
+    if (!cleanEmail) {
       return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
     }
 
-    if (!message || message.trim().length < 10) {
+    if (!cleanMessage || cleanMessage.length < 10) {
       return NextResponse.json(
         { error: 'Please provide a message with at least 10 characters describing your project requirements.' },
+        { status: 400 }
+      );
+    }
+
+    // Block obvious SQL injection payloads
+    if (
+      hasSqlInjectionSignature(cleanName) || 
+      hasSqlInjectionSignature(cleanMessage) || 
+      hasSqlInjectionSignature(cleanService)
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid or malicious characters detected in input. Please submit valid text.' },
         { status: 400 }
       );
     }
@@ -44,11 +63,11 @@ export async function POST(req: NextRequest) {
     const nowIso = new Date().toISOString();
 
     const newEnquiry = await createEnquiry({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone ? phone.trim() : undefined,
-      service_requested: service_requested || 'General Consultation',
-      message: message.trim(),
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone || undefined,
+      service_requested: cleanService,
+      message: cleanMessage,
       ip_hash: hashClientIp(ip),
       status: 'new',
       terms_accepted: true,

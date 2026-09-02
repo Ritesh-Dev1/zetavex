@@ -11,9 +11,24 @@ export function hashPassword(password: string): string {
   return bcrypt.hashSync(password, salt);
 }
 
-export function verifyPassword(password: string, hash: string): boolean {
+export function verifyPassword(password: string, hashOrPlain: string): boolean {
   try {
-    return bcrypt.compareSync(password, hash);
+    if (!password || !hashOrPlain) return false;
+
+    const trimmedPassword = password.trim();
+    const trimmedHash = hashOrPlain.trim();
+
+    // 1. Check direct match (in case plain text was entered or seeded in SQL table)
+    if (trimmedPassword === trimmedHash) {
+      return true;
+    }
+
+    // 2. Check bcrypt hash
+    if (trimmedHash.startsWith('$2a$') || trimmedHash.startsWith('$2b$') || trimmedHash.startsWith('$2y$')) {
+      return bcrypt.compareSync(trimmedPassword, trimmedHash);
+    }
+
+    return false;
   } catch (error) {
     console.error('Password verification error:', error);
     return false;

@@ -27,7 +27,7 @@ export const supabaseAdmin = isSupabaseAdminConfigured
     })
   : null;
 
-// In-memory persistent fallback repository ONLY used when Supabase credentials are completely absent
+// In-memory fallback repository ONLY used when Supabase is completely unconfigured
 class MemoryStore {
   services: Service[] = [];
   projects: Project[] = [];
@@ -65,7 +65,6 @@ class MemoryStore {
   })();
 }
 
-// Global singleton to prevent reset across API calls in same Node process
 const globalMemory = (global as unknown as { __zetaVexStore?: MemoryStore });
 if (!globalMemory.__zetaVexStore) {
   globalMemory.__zetaVexStore = new MemoryStore();
@@ -114,45 +113,63 @@ export async function getAllServices(): Promise<Service[]> {
 }
 
 export async function createService(service: Omit<Service, 'id'>): Promise<Service> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('services')
+      .insert([{
+        title: service.title,
+        slug: service.slug,
+        description: service.description,
+        icon_name: service.icon_name || 'Code',
+        tech_tags: Array.isArray(service.tech_tags) ? service.tech_tags : [],
+        sort_order: typeof service.sort_order === 'number' ? service.sort_order : 1,
+        status: service.status || 'active',
+      }])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Supabase createService error:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
+    return data as Service;
+  }
+
   const newService: Service = {
     ...service,
     id: `srv-${Date.now()}`,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
-
-  if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('services')
-        .insert([service])
-        .select()
-        .single();
-      if (!error && data) return data as Service;
-      if (error) console.error('Supabase createService error:', error);
-    } catch (err) {
-      console.error('Supabase createService exception:', err);
-    }
-  }
-
   localDb.services.push(newService);
   return newService;
 }
 
 export async function updateService(id: string, updates: Partial<Service>): Promise<Service | null> {
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('services')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-      if (!error && data) return data as Service;
-      if (error) console.error('Supabase updateService error:', error);
-    } catch (err) {
-      console.error('Supabase updateService exception:', err);
+    const updatePayload: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.title !== undefined) updatePayload.title = updates.title;
+    if (updates.slug !== undefined) updatePayload.slug = updates.slug;
+    if (updates.description !== undefined) updatePayload.description = updates.description;
+    if (updates.icon_name !== undefined) updatePayload.icon_name = updates.icon_name;
+    if (updates.tech_tags !== undefined) updatePayload.tech_tags = Array.isArray(updates.tech_tags) ? updates.tech_tags : [];
+    if (updates.sort_order !== undefined) updatePayload.sort_order = typeof updates.sort_order === 'number' ? updates.sort_order : 1;
+    if (updates.status !== undefined) updatePayload.status = updates.status;
+
+    const { data, error } = await supabaseAdmin
+      .from('services')
+      .update(updatePayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateService error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return data as Service;
   }
 
   const idx = localDb.services.findIndex(s => s.id === id);
@@ -163,18 +180,16 @@ export async function updateService(id: string, updates: Partial<Service>): Prom
 
 export async function deleteService(id: string): Promise<boolean> {
   if (supabaseAdmin) {
-    try {
-      const { error } = await supabaseAdmin
-        .from('services')
-        .delete()
-        .eq('id', id);
-      if (!error) return true;
+    const { error } = await supabaseAdmin
+      .from('services')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
       console.error('Supabase deleteService error:', error);
-      return false;
-    } catch (err) {
-      console.error('Supabase deleteService exception:', err);
-      return false;
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return true;
   }
 
   const initialLen = localDb.services.length;
@@ -224,45 +239,69 @@ export async function getAllProjects(): Promise<Project[]> {
 }
 
 export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('projects')
+      .insert([{
+        title: project.title,
+        slug: project.slug,
+        category: project.category || 'Web Application',
+        description: project.description,
+        image_url: project.image_url || '',
+        demo_url: project.demo_url || '',
+        tech_tags: Array.isArray(project.tech_tags) ? project.tech_tags : [],
+        is_featured: Boolean(project.is_featured),
+        sort_order: typeof project.sort_order === 'number' ? project.sort_order : 1,
+        status: project.status || 'published',
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase createProject error:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
+    return data as Project;
+  }
+
   const newProject: Project = {
     ...project,
     id: `prj-${Date.now()}`,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
-
-  if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('projects')
-        .insert([project])
-        .select()
-        .single();
-      if (!error && data) return data as Project;
-      if (error) console.error('Supabase createProject error:', error);
-    } catch (err) {
-      console.error('Supabase createProject exception:', err);
-    }
-  }
-
   localDb.projects.push(newProject);
   return newProject;
 }
 
 export async function updateProject(id: string, updates: Partial<Project>): Promise<Project | null> {
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('projects')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-      if (!error && data) return data as Project;
-      if (error) console.error('Supabase updateProject error:', error);
-    } catch (err) {
-      console.error('Supabase updateProject exception:', err);
+    const updatePayload: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.title !== undefined) updatePayload.title = updates.title;
+    if (updates.slug !== undefined) updatePayload.slug = updates.slug;
+    if (updates.category !== undefined) updatePayload.category = updates.category;
+    if (updates.description !== undefined) updatePayload.description = updates.description;
+    if (updates.image_url !== undefined) updatePayload.image_url = updates.image_url;
+    if (updates.demo_url !== undefined) updatePayload.demo_url = updates.demo_url;
+    if (updates.tech_tags !== undefined) updatePayload.tech_tags = Array.isArray(updates.tech_tags) ? updates.tech_tags : [];
+    if (updates.is_featured !== undefined) updatePayload.is_featured = Boolean(updates.is_featured);
+    if (updates.sort_order !== undefined) updatePayload.sort_order = typeof updates.sort_order === 'number' ? updates.sort_order : 1;
+    if (updates.status !== undefined) updatePayload.status = updates.status;
+
+    const { data, error } = await supabaseAdmin
+      .from('projects')
+      .update(updatePayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateProject error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return data as Project;
   }
 
   const idx = localDb.projects.findIndex(p => p.id === id);
@@ -273,18 +312,16 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
 
 export async function deleteProject(id: string): Promise<boolean> {
   if (supabaseAdmin) {
-    try {
-      const { error } = await supabaseAdmin
-        .from('projects')
-        .delete()
-        .eq('id', id);
-      if (!error) return true;
+    const { error } = await supabaseAdmin
+      .from('projects')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
       console.error('Supabase deleteProject error:', error);
-      return false;
-    } catch (err) {
-      console.error('Supabase deleteProject exception:', err);
-      return false;
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return true;
   }
 
   const initialLen = localDb.projects.length;
@@ -334,44 +371,62 @@ export async function getAllTeamMembers(): Promise<TeamMember[]> {
 }
 
 export async function createTeamMember(member: Omit<TeamMember, 'id'>): Promise<TeamMember> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('team_members')
+      .insert([{
+        name: member.name,
+        role: member.role,
+        bio: member.bio,
+        photo_url: member.photo_url || '',
+        linkedin_url: member.linkedin_url || '',
+        whatsapp_number: member.whatsapp_number || '',
+        sort_order: typeof member.sort_order === 'number' ? member.sort_order : 1,
+        status: member.status || 'active',
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase createTeamMember error:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
+    return data as TeamMember;
+  }
+
   const newMember: TeamMember = {
     ...member,
     id: `team-${Date.now()}`,
     created_at: new Date().toISOString(),
   };
-
-  if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('team_members')
-        .insert([member])
-        .select()
-        .single();
-      if (!error && data) return data as TeamMember;
-      if (error) console.error('Supabase createTeamMember error:', error);
-    } catch (err) {
-      console.error('Supabase createTeamMember exception:', err);
-    }
-  }
-
   localDb.team.push(newMember);
   return newMember;
 }
 
 export async function updateTeamMember(id: string, updates: Partial<TeamMember>): Promise<TeamMember | null> {
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('team_members')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      if (!error && data) return data as TeamMember;
-      if (error) console.error('Supabase updateTeamMember error:', error);
-    } catch (err) {
-      console.error('Supabase updateTeamMember exception:', err);
+    const updatePayload: Record<string, any> = {};
+    if (updates.name !== undefined) updatePayload.name = updates.name;
+    if (updates.role !== undefined) updatePayload.role = updates.role;
+    if (updates.bio !== undefined) updatePayload.bio = updates.bio;
+    if (updates.photo_url !== undefined) updatePayload.photo_url = updates.photo_url;
+    if (updates.linkedin_url !== undefined) updatePayload.linkedin_url = updates.linkedin_url;
+    if (updates.whatsapp_number !== undefined) updatePayload.whatsapp_number = updates.whatsapp_number;
+    if (updates.sort_order !== undefined) updatePayload.sort_order = typeof updates.sort_order === 'number' ? updates.sort_order : 1;
+    if (updates.status !== undefined) updatePayload.status = updates.status;
+
+    const { data, error } = await supabaseAdmin
+      .from('team_members')
+      .update(updatePayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateTeamMember error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return data as TeamMember;
   }
 
   const idx = localDb.team.findIndex(t => t.id === id);
@@ -382,18 +437,16 @@ export async function updateTeamMember(id: string, updates: Partial<TeamMember>)
 
 export async function deleteTeamMember(id: string): Promise<boolean> {
   if (supabaseAdmin) {
-    try {
-      const { error } = await supabaseAdmin
-        .from('team_members')
-        .delete()
-        .eq('id', id);
-      if (!error) return true;
+    const { error } = await supabaseAdmin
+      .from('team_members')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
       console.error('Supabase deleteTeamMember error:', error);
-      return false;
-    } catch (err) {
-      console.error('Supabase deleteTeamMember exception:', err);
-      return false;
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return true;
   }
 
   const initialLen = localDb.team.length;
@@ -441,44 +494,60 @@ export async function getAllReviews(): Promise<ClientReview[]> {
 }
 
 export async function createReview(review: Omit<ClientReview, 'id'>): Promise<ClientReview> {
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin
+      .from('client_reviews')
+      .insert([{
+        client_name: review.client_name,
+        company_name: review.company_name,
+        role: review.role || '',
+        avatar_url: review.avatar_url || '',
+        quote: review.quote,
+        rating: typeof review.rating === 'number' ? review.rating : 5,
+        is_approved: review.is_approved !== undefined ? Boolean(review.is_approved) : true,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase createReview error:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
+    return data as ClientReview;
+  }
+
   const newReview: ClientReview = {
     ...review,
     id: `rev-${Date.now()}`,
     created_at: new Date().toISOString(),
   };
-
-  if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('client_reviews')
-        .insert([review])
-        .select()
-        .single();
-      if (!error && data) return data as ClientReview;
-      if (error) console.error('Supabase createReview error:', error);
-    } catch (err) {
-      console.error('Supabase createReview exception:', err);
-    }
-  }
-
   localDb.reviews.unshift(newReview);
   return newReview;
 }
 
 export async function updateReview(id: string, updates: Partial<ClientReview>): Promise<ClientReview | null> {
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('client_reviews')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      if (!error && data) return data as ClientReview;
-      if (error) console.error('Supabase updateReview error:', error);
-    } catch (err) {
-      console.error('Supabase updateReview exception:', err);
+    const updatePayload: Record<string, any> = {};
+    if (updates.client_name !== undefined) updatePayload.client_name = updates.client_name;
+    if (updates.company_name !== undefined) updatePayload.company_name = updates.company_name;
+    if (updates.role !== undefined) updatePayload.role = updates.role;
+    if (updates.avatar_url !== undefined) updatePayload.avatar_url = updates.avatar_url;
+    if (updates.quote !== undefined) updatePayload.quote = updates.quote;
+    if (updates.rating !== undefined) updatePayload.rating = typeof updates.rating === 'number' ? updates.rating : 5;
+    if (updates.is_approved !== undefined) updatePayload.is_approved = Boolean(updates.is_approved);
+
+    const { data, error } = await supabaseAdmin
+      .from('client_reviews')
+      .update(updatePayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateReview error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return data as ClientReview;
   }
 
   const idx = localDb.reviews.findIndex(r => r.id === id);
@@ -489,18 +558,16 @@ export async function updateReview(id: string, updates: Partial<ClientReview>): 
 
 export async function deleteReview(id: string): Promise<boolean> {
   if (supabaseAdmin) {
-    try {
-      const { error } = await supabaseAdmin
-        .from('client_reviews')
-        .delete()
-        .eq('id', id);
-      if (!error) return true;
+    const { error } = await supabaseAdmin
+      .from('client_reviews')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
       console.error('Supabase deleteReview error:', error);
-      return false;
-    } catch (err) {
-      console.error('Supabase deleteReview exception:', err);
-      return false;
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return true;
   }
 
   const initialLen = localDb.reviews.length;
@@ -531,6 +598,57 @@ export async function getAllEnquiries(): Promise<Enquiry[]> {
 
 export async function createEnquiry(enquiry: Omit<Enquiry, 'id'>): Promise<Enquiry> {
   const nowIso = new Date().toISOString();
+
+  if (supabaseAdmin) {
+    try {
+      // 1. Try full insert with terms fields
+      const { data, error } = await supabaseAdmin
+        .from('enquiries')
+        .insert([{
+          name: enquiry.name,
+          email: enquiry.email,
+          phone: enquiry.phone || '',
+          service_requested: enquiry.service_requested || 'General Consultation',
+          message: enquiry.message,
+          ip_hash: enquiry.ip_hash || '',
+          status: enquiry.status || 'new',
+          terms_accepted: enquiry.terms_accepted ?? true,
+          terms_accepted_at: enquiry.terms_accepted_at || nowIso,
+        }])
+        .select()
+        .single();
+
+      if (!error && data) return data as Enquiry;
+
+      // 2. Graceful fallback if table doesn't have terms columns yet
+      if (error) {
+        console.warn('Full enquiry insert warning, retrying standard schema:', error.message);
+        const { data: fallbackData, error: fallbackError } = await supabaseAdmin
+          .from('enquiries')
+          .insert([{
+            name: enquiry.name,
+            email: enquiry.email,
+            phone: enquiry.phone || '',
+            service_requested: enquiry.service_requested || 'General Consultation',
+            message: enquiry.message,
+            ip_hash: enquiry.ip_hash || '',
+            status: enquiry.status || 'new',
+          }])
+          .select()
+          .single();
+
+        if (!fallbackError && fallbackData) return fallbackData as Enquiry;
+        if (fallbackError) {
+          console.error('Supabase createEnquiry fallback error:', fallbackError);
+          throw new Error(`Database Error: ${fallbackError.message}`);
+        }
+      }
+    } catch (err: any) {
+      console.error('Supabase createEnquiry exception:', err);
+      throw err;
+    }
+  }
+
   const newEnquiry: Enquiry = {
     ...enquiry,
     id: `enq-${Date.now()}`,
@@ -539,49 +657,24 @@ export async function createEnquiry(enquiry: Omit<Enquiry, 'id'>): Promise<Enqui
     terms_accepted_at: enquiry.terms_accepted_at || nowIso,
     created_at: enquiry.created_at || nowIso,
   };
-
-  if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('enquiries')
-        .insert([{
-          name: enquiry.name,
-          email: enquiry.email,
-          phone: enquiry.phone,
-          service_requested: enquiry.service_requested,
-          message: enquiry.message,
-          ip_hash: enquiry.ip_hash,
-          status: enquiry.status || 'new',
-          terms_accepted: enquiry.terms_accepted ?? true,
-          terms_accepted_at: enquiry.terms_accepted_at || nowIso,
-        }])
-        .select()
-        .single();
-      if (!error && data) return data as Enquiry;
-      if (error) console.error('Supabase createEnquiry error:', error);
-    } catch (err) {
-      console.error('Supabase createEnquiry exception:', err);
-    }
-  }
-
   localDb.enquiries.unshift(newEnquiry);
   return newEnquiry;
 }
 
 export async function updateEnquiryStatus(id: string, status: Enquiry['status']): Promise<Enquiry | null> {
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('enquiries')
-        .update({ status })
-        .eq('id', id)
-        .select()
-        .single();
-      if (!error && data) return data as Enquiry;
-      if (error) console.error('Supabase updateEnquiryStatus error:', error);
-    } catch (err) {
-      console.error('Supabase updateEnquiryStatus exception:', err);
+    const { data, error } = await supabaseAdmin
+      .from('enquiries')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateEnquiryStatus error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return data as Enquiry;
   }
 
   const idx = localDb.enquiries.findIndex(e => e.id === id);
@@ -592,18 +685,16 @@ export async function updateEnquiryStatus(id: string, status: Enquiry['status'])
 
 export async function deleteEnquiry(id: string): Promise<boolean> {
   if (supabaseAdmin) {
-    try {
-      const { error } = await supabaseAdmin
-        .from('enquiries')
-        .delete()
-        .eq('id', id);
-      if (!error) return true;
+    const { error } = await supabaseAdmin
+      .from('enquiries')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
       console.error('Supabase deleteEnquiry error:', error);
-      return false;
-    } catch (err) {
-      console.error('Supabase deleteEnquiry exception:', err);
-      return false;
+      throw new Error(`Database Error: ${error.message}`);
     }
+    return true;
   }
 
   const initialLen = localDb.enquiries.length;
@@ -617,13 +708,17 @@ export async function deleteEnquiry(id: string): Promise<boolean> {
 
 export async function getAdminByEmail(email: string) {
   const normalizedEmail = email.toLowerCase().trim();
+  const envEmail = (process.env.ADMIN_EMAIL || process.env.ADMIN_INITIAL_EMAIL || '').toLowerCase().trim();
+  const envPass = process.env.ADMIN_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD || '';
+  const envHash = process.env.ADMIN_PASSWORD_HASH || '';
 
+  // 1. Check Supabase DB first if configured
   if (supabaseAdmin) {
     try {
       const { data, error } = await supabaseAdmin
         .from('admin_users')
         .select('*')
-        .eq('email', normalizedEmail)
+        .ilike('email', normalizedEmail)
         .single();
       if (!error && data) return data;
       if (error && error.code !== 'PGRST116') {
@@ -632,7 +727,35 @@ export async function getAdminByEmail(email: string) {
     } catch (err) {
       console.error('Supabase getAdminByEmail exception:', err);
     }
-    return null;
+  }
+
+  // 2. Check environment variables (.env / .env.local / Vercel envs)
+  if (envEmail && normalizedEmail === envEmail && (envPass || envHash)) {
+    const passwordHash = envHash || hashPassword(envPass);
+    const envAdminUser = {
+      id: 'admin-env-1',
+      email: envEmail,
+      password_hash: passwordHash,
+      role: 'super_admin' as const,
+      status: 'active' as const,
+      created_at: new Date().toISOString(),
+    };
+
+    // Auto-sync into Supabase DB if DB is configured
+    if (supabaseAdmin) {
+      try {
+        supabaseAdmin.from('admin_users').upsert({
+          email: envEmail,
+          password_hash: passwordHash,
+          role: 'super_admin',
+          status: 'active',
+        }, { onConflict: 'email' }).then(() => {});
+      } catch (e) {
+        // Non-blocking sync
+      }
+    }
+
+    return envAdminUser;
   }
 
   return localDb.adminUsers.find(u => u.email.toLowerCase() === normalizedEmail) || null;
@@ -642,23 +765,22 @@ export async function updateAdminPassword(email: string, newPasswordHash: string
   const normalizedEmail = email.toLowerCase().trim();
 
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('admin_users')
-        .update({
-          password_hash: newPasswordHash,
-          reset_token_hash: null,
-          reset_token_expires_at: null,
-        })
-        .eq('email', normalizedEmail)
-        .select()
-        .single();
-      if (!error && data) return data;
-      if (error) console.error('Supabase updateAdminPassword error:', error);
-    } catch (err) {
-      console.error('Supabase updateAdminPassword exception:', err);
+    const { data, error } = await supabaseAdmin
+      .from('admin_users')
+      .update({
+        password_hash: newPasswordHash,
+        reset_token_hash: null,
+        reset_token_expires_at: null,
+      })
+      .eq('email', normalizedEmail)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateAdminPassword error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
-    return null;
+    return data;
   }
 
   const user = localDb.adminUsers.find(u => u.email.toLowerCase() === normalizedEmail);
@@ -675,22 +797,21 @@ export async function setAdminResetToken(email: string, tokenHash: string, expir
   const normalizedEmail = email.toLowerCase().trim();
 
   if (supabaseAdmin) {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('admin_users')
-        .update({
-          reset_token_hash: tokenHash,
-          reset_token_expires_at: expiresAt.toISOString(),
-        })
-        .eq('email', normalizedEmail)
-        .select()
-        .single();
-      if (!error && data) return data;
-      if (error) console.error('Supabase setAdminResetToken error:', error);
-    } catch (err) {
-      console.error('Supabase setAdminResetToken exception:', err);
+    const { data, error } = await supabaseAdmin
+      .from('admin_users')
+      .update({
+        reset_token_hash: tokenHash,
+        reset_token_expires_at: expiresAt.toISOString(),
+      })
+      .eq('email', normalizedEmail)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase setAdminResetToken error:', error);
+      throw new Error(`Database Error: ${error.message}`);
     }
-    return null;
+    return data;
   }
 
   const user = localDb.adminUsers.find(u => u.email.toLowerCase() === normalizedEmail);

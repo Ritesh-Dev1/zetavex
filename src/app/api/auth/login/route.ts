@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminByEmail, isAdminConfiguredInEnv } from '@/lib/supabase/admin';
-import { verifyPassword, signAdminToken, COOKIE_NAME } from '@/lib/auth';
+import { getAdminByEmail, isAdminConfiguredInEnv, supabaseAdmin } from '@/lib/supabase/admin';
+import { verifyPassword, signAdminToken, hashPassword, COOKIE_NAME } from '@/lib/auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    // Rate limit: Max 5 login attempts per IP per 15 minutes
-    const rateCheck = await checkRateLimit('admin_login', ip, 5, 15);
+    // Rate limit: Max 15 login attempts per IP per 15 minutes
+    const rateCheck = await checkRateLimit('admin_login', ip, 15, 15);
     if (!rateCheck.success) {
       return NextResponse.json(
         { 
@@ -18,7 +18,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, password } = body;
+    const rawEmail = typeof body.email === 'string' ? body.email : '';
+    const rawPassword = typeof body.password === 'string' ? body.password : '';
+
+    const email = rawEmail.trim().toLowerCase();
+    const password = rawPassword.trim();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -27,35 +31,77 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const admin = await getAdminByEmail(email);
+    const envEmail = (process.env.ADMIN_EMAIL || process.env.ADMIN_INITIAL_EMAIL || '').trim().toLowerCase();
+    const envPass = (process.env.ADMIN_PASSWORD || process.env.ADMIN_INITIAL_PASSWORD || '').trim();
 
-    // If no admin user is found and no admin is configured in the environment (.env)
-    if (!admin) {
-      if (!isAdminConfiguredInEnv()) {
+    let authenticatedAdmin: { id: string; email: string; role: 'super_admin' | 'admin' } | null = null;
+
+    // 1. MASTER ENVIRONMENT CREDENTIALS CHECK (.env.local / .env / Vercel Envs)
+    if (envEmail && envPass && email === envEmail && password === envPass) {
+      const passwordHash = hashPassword(envPass);
+      authenticatedAdmin = {
+        id: 'admin-master-env',
+        email: envEmail,
+        role: 'super_admin',
+      };
+
+      // Auto-heal and sync to Supabase database in background
+      if (supabaseAdmin) {
+        try {
+          supabaseAdmin.from('admin_users').upsert({
+            email: envEmail,
+            password_hash: passwordHash,
+            role: 'super_admin',
+            status: 'active',
+            last_login_at: new Date().toISOString(),
+          }, { onConflict: 'email' }).then(() => {});
+        } catch (e) {
+          // non-blocking sync
+        }
+      }
+    } else {
+      // 2. DATABASE CREDENTIALS CHECK (admin_users table in Supabase)
+      const admin = await getAdminByEmail(email);
+
+      if (!admin) {
         return NextResponse.json(
-          { 
-            error: 'Admin login is not configured in your environment (.env). Please contact the developer for admin access.',
-            unconfigured: true
-          },
-          { status: 503 }
+          { error: 'Invalid email or password credentials.' },
+          { status: 401 }
         );
       }
 
-      return NextResponse.json(
-        { error: 'Invalid email or password credentials.' },
-        { status: 401 }
-      );
+      if (admin.status !== 'active') {
+        return NextResponse.json(
+          { error: 'This admin account is currently inactive. Please contact the administrator.' },
+          { status: 403 }
+        );
+      }
+
+      const isValid = verifyPassword(password, admin.password_hash);
+      if (!isValid) {
+        return NextResponse.json(
+          { error: 'Invalid email or password credentials.' },
+          { status: 401 }
+        );
+      }
+
+      // If password in DB was stored as plain text, auto-upgrade to bcrypt
+      if (admin.password_hash === password && supabaseAdmin && admin.id && !admin.id.startsWith('admin-env-')) {
+        const newHash = hashPassword(password);
+        supabaseAdmin.from('admin_users').update({ 
+          password_hash: newHash,
+          last_login_at: new Date().toISOString()
+        }).eq('id', admin.id).then(() => {});
+      }
+
+      authenticatedAdmin = {
+        id: admin.id,
+        email: admin.email,
+        role: admin.role,
+      };
     }
 
-    if (admin.status !== 'active') {
-      return NextResponse.json(
-        { error: 'This admin account is currently inactive. Please contact the developer.' },
-        { status: 403 }
-      );
-    }
-
-    const isValid = verifyPassword(password, admin.password_hash);
-    if (!isValid) {
+    if (!authenticatedAdmin) {
       return NextResponse.json(
         { error: 'Invalid email or password credentials.' },
         { status: 401 }
@@ -63,17 +109,17 @@ export async function POST(req: NextRequest) {
     }
 
     const token = signAdminToken({
-      userId: admin.id,
-      email: admin.email,
-      role: admin.role,
+      userId: authenticatedAdmin.id,
+      email: authenticatedAdmin.email,
+      role: authenticatedAdmin.role,
     });
 
     const response = NextResponse.json({
       success: true,
       user: {
-        id: admin.id,
-        email: admin.email,
-        role: admin.role,
+        id: authenticatedAdmin.id,
+        email: authenticatedAdmin.email,
+        role: authenticatedAdmin.role,
       },
     });
 

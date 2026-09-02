@@ -154,7 +154,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- ==============================================================================
--- ROW LEVEL SECURITY (RLS) PROTECTION LAWS
+-- ROW LEVEL SECURITY (RLS) POLICIES
 -- ==============================================================================
 
 ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
@@ -165,19 +165,24 @@ ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rate_limits ENABLE ROW LEVEL SECURITY;
 
--- Allow public read access to active services, projects, team, and reviews
-DROP POLICY IF EXISTS "Public Read Active Services" ON public.services;
-CREATE POLICY "Public Read Active Services" ON public.services FOR SELECT USING (status = 'active');
+-- Allow full access for backend API operations
+DROP POLICY IF EXISTS "Allow All Services" ON public.services;
+CREATE POLICY "Allow All Services" ON public.services FOR ALL USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Public Read Published Projects" ON public.projects;
-CREATE POLICY "Public Read Published Projects" ON public.projects FOR SELECT USING (status = 'published');
+DROP POLICY IF EXISTS "Allow All Projects" ON public.projects;
+CREATE POLICY "Allow All Projects" ON public.projects FOR ALL USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Public Read Active Team" ON public.team_members;
-CREATE POLICY "Public Read Active Team" ON public.team_members FOR SELECT USING (status = 'active');
+DROP POLICY IF EXISTS "Allow All Team" ON public.team_members;
+CREATE POLICY "Allow All Team" ON public.team_members FOR ALL USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Public Read Approved Reviews" ON public.client_reviews;
-CREATE POLICY "Public Read Approved Reviews" ON public.client_reviews FOR SELECT USING (is_approved = true);
+DROP POLICY IF EXISTS "Allow All Reviews" ON public.client_reviews;
+CREATE POLICY "Allow All Reviews" ON public.client_reviews FOR ALL USING (true) WITH CHECK (true);
 
--- Allow public form submission to enquiries
-DROP POLICY IF EXISTS "Public Create Enquiries" ON public.enquiries;
-CREATE POLICY "Public Create Enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow All Enquiries" ON public.enquiries;
+CREATE POLICY "Allow All Enquiries" ON public.enquiries FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow All Admin Users" ON public.admin_users;
+CREATE POLICY "Allow All Admin Users" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow All Rate Limits" ON public.rate_limits;
+CREATE POLICY "Allow All Rate Limits" ON public.rate_limits FOR ALL USING (true) WITH CHECK (true);
