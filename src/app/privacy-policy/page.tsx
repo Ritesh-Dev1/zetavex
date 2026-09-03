@@ -7,13 +7,13 @@ import { COMPANY_INFO } from '@/lib/constants';
 import { getBreadcrumbSchema, PRIMARY_KEYWORDS, SITE_URL } from '@/lib/seo';
 import JsonLd from '@/components/seo/JsonLd';
 import Link from 'next/link';
-import { ShieldCheck, ArrowLeft, Lock, FileText, Mail, MapPin, CheckCircle2, Home, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, MapPin, CheckCircle2, Home, ChevronRight, Database, EyeOff, Server, Globe } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | ZetaVex Tech Solutions',
   description:
-    'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption and strict privacy standards.',
+    'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption, DPDP compliance, and strict privacy standards.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/privacy-policy`,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Privacy Policy | ZetaVex Tech Solutions',
     description:
-      'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption and strict privacy standards.',
+      'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption, DPDP compliance, and strict privacy standards.',
     url: `${SITE_URL}/privacy-policy`,
     type: 'article',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Privacy Policy' }],
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Privacy Policy | ZetaVex Tech Solutions',
     description:
-      'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption and strict privacy standards.',
+      'Read the Privacy Policy of ZetaVex Tech Solutions. Learn how we safeguard client data with database encryption, DPDP compliance, and strict privacy standards.',
     images: ['/logo.png'],
   },
 };
@@ -64,7 +64,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#EBE8E1] text-[11px] font-bold text-[#FF5500] uppercase tracking-wider w-fit mb-3">
             <Lock className="w-3 h-3" />
-            <span>Legal &amp; Compliance</span>
+            <span>Legal &amp; Data Governance</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-[#0A0A0B] mb-4">
@@ -72,7 +72,7 @@ export default function PrivacyPolicyPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-[#57534E] leading-relaxed">
-            Last Updated: August 31, 2026 · Effective Immediately for ZetaVex Tech Solutions
+            Effective Date: September 2026 · Governing all digital interactions with ZetaVex Tech Solutions
           </p>
         </div>
       </section>
@@ -81,126 +81,141 @@ export default function PrivacyPolicyPage() {
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-3xl p-6 sm:p-12 border border-[#EBE8E1] shadow-xs flex flex-col gap-10 text-[#44403C] text-sm sm:text-base leading-relaxed">
-            {/* Overview */}
+            
+            {/* 01. Overview */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">01.</span>
-                <span>Overview &amp; Scope</span>
+                <span>Entity Overview &amp; Scope</span>
               </h2>
               <p>
-                At <strong>{COMPANY_INFO.name}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), founded and operated by <strong>{COMPANY_INFO.founder}</strong> (MSME Udyam Registration No. <strong className="font-mono text-[#0A0A0B]">{COMPANY_INFO.udyamRegNo}</strong>), we are committed to protecting the privacy, confidentiality, and security of our clients, partners, and website visitors.
+                This Privacy Policy is issued by <strong>{COMPANY_INFO.name}</strong> (&ldquo;ZetaVex&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), a registered technology enterprise founded and operated by <strong>{COMPANY_INFO.founder}</strong> ({COMPANY_INFO.founderTitle}), officially registered under MSME Udyam Registration No. <strong className="font-mono text-[#0A0A0B]">{COMPANY_INFO.udyamRegNo}</strong> in Rewari, Haryana, India.
               </p>
               <p className="mt-3">
-                This Privacy Policy describes how we collect, store, process, and protect your information when you visit our marketing platform, submit project enquiry forms, or engage our custom software engineering services.
+                We are dedicated to safeguarding the privacy, confidentiality, and data sovereignty of all clients, business partners, and website visitors in accordance with the Digital Personal Data Protection (DPDP) Act of India and international data governance best practices.
               </p>
             </div>
 
-            {/* Information We Collect */}
+            {/* 02. Information We Collect */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">02.</span>
                 <span>Information We Collect</span>
               </h2>
-              <ul className="list-disc pl-5 flex flex-col gap-2 mt-2">
-                <li>
-                  <strong>Direct Client Details:</strong> When you submit a project enquiry or request a software architecture scope, we collect your name, business email address, phone/WhatsApp number, and project specification details.
-                </li>
-                <li>
-                  <strong>Technical &amp; Telemetry Data:</strong> We log anonymized IP addresses hashed with SHA-256 for rate-limiting, browser user agent strings, and device operating characteristics to safeguard our systems against spam and DDoS abuse.
-                </li>
-                <li>
-                  <strong>Authentication Logs:</strong> Administrative sessions utilize secure, encrypted JSON Web Tokens (JWT) stored in HTTP-only, SameSite cookies.
-                </li>
-              </ul>
-            </div>
-
-            {/* How We Use Information */}
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
-                <span className="text-[#FF5500]">03.</span>
-                <span>How We Use Your Information</span>
-              </h2>
-              <p>We process collected information strictly for legitimate commercial and technical purposes, including:</p>
-              <ul className="list-disc pl-5 flex flex-col gap-2 mt-2">
-                <li>Evaluating project requirements and generating technical scopes, architectures, and price quotes.</li>
-                <li>Communicating project updates, milestone deliverables, and client support through official channels (WhatsApp and Email).</li>
-                <li>Protecting website integrity, preventing automated form flooding, and maintaining server rate limits.</li>
-                <li>Complying with applicable statutory, tax, and MSME regulatory requirements under Indian law.</li>
-              </ul>
-            </div>
-
-            {/* Data Protection & Security */}
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
-                <span className="text-[#FF5500]">04.</span>
-                <span>Data Protection &amp; Security Measures</span>
-              </h2>
-              <p>
-                We implement industry-standard technical safeguards to protect your personal and proprietary data:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className="flex flex-col gap-3 mt-3">
                 <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#FF5500] uppercase mb-1">
-                    <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                    <span>Database Encryption</span>
-                  </div>
-                  <p className="text-xs text-[#57534E]">
-                    Remote Supabase PostgreSQL with strict Row Level Security (RLS) policies and encrypted transmissions (TLS 1.3).
+                  <strong className="block text-[#0A0A0B] font-bold mb-1">A. Direct Client &amp; Lead Inquiries</strong>
+                  <p className="text-xs sm:text-sm text-[#57534E]">
+                    When you submit a project enquiry or contact us, we collect your full name, business email address, phone/WhatsApp number, selected engineering service category, and project specifications.
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#FF5500] uppercase mb-1">
-                    <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                    <span>Rate Limiting</span>
-                  </div>
-                  <p className="text-xs text-[#57534E]">
-                    SHA-256 hashed IP rate limiter preventing automated scraping, credential attacks, and spam bots.
+                  <strong className="block text-[#0A0A0B] font-bold mb-1">B. Google Analytics 4 (GA4) &amp; Telemetry</strong>
+                  <p className="text-xs sm:text-sm text-[#57534E]">
+                    We use Google Analytics 4 to understand website engagement patterns (e.g. pages viewed, session duration, device type, geographic region). All IP addresses are automatically anonymized, and no personally identifiable information (PII) is transmitted to advertising networks.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
+                  <strong className="block text-[#0A0A0B] font-bold mb-1">C. Security &amp; Rate-Limiting Logs</strong>
+                  <p className="text-xs sm:text-sm text-[#57534E]">
+                    To defend our infrastructure against automated bot spam, DDoS attacks, and unauthorized intrusion attempts, our API gateways log one-way cryptographic SHA-256 hashes of client IP addresses for rate-limiting purposes.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Information Sharing */}
+            {/* 03. Purpose of Processing */}
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
+                <span className="text-[#FF5500]">03.</span>
+                <span>How We Use Your Information</span>
+              </h2>
+              <p>Your information is processed strictly for legitimate engineering and commercial purposes, including:</p>
+              <ul className="list-disc pl-5 flex flex-col gap-2 mt-2">
+                <li>Evaluating software specifications and preparing tailored architectural proposals and milestone roadmaps.</li>
+                <li>Communicating sprint progress, technical deliverables, and staging deployments directly with your product team.</li>
+                <li>Optimizing application performance, user interface responsiveness, and system uptime.</li>
+                <li>Complying with statutory accounting, MSME regulations, and taxation laws under Indian jurisdiction.</li>
+              </ul>
+            </div>
+
+            {/* 04. Data Security & Technical Safeguards */}
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
+                <span className="text-[#FF5500]">04.</span>
+                <span>Security Architecture &amp; Database Safeguards</span>
+              </h2>
+              <p>We deploy enterprise-grade defensive measures to ensure the integrity of client data:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#FF5500] uppercase mb-1">
+                    <Database className="w-4 h-4 text-[#10B981]" />
+                    <span>Row Level Security (RLS)</span>
+                  </div>
+                  <p className="text-xs text-[#57534E]">
+                    Database tables in Supabase PostgreSQL are isolated with strict Row Level Security policies and TLS 1.3 encryption in transit and at rest.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#FF5500] uppercase mb-1">
+                    <ShieldCheck className="w-4 h-4 text-[#10B981]" />
+                    <span>SQLi &amp; XSS Defense</span>
+                  </div>
+                  <p className="text-xs text-[#57534E]">
+                    All API endpoints feature parameterized prepared queries, input sanitization routines, and real-time malicious pattern filtering.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 05. Zero Third-Party Selling */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">05.</span>
-                <span>No Selling of Personal Data</span>
+                <span>Zero Data Monetization Guarantee</span>
               </h2>
               <p>
-                <strong>We do not sell, rent, lease, or monetize your personal or company data to any third-party marketing brokers or advertisers.</strong> We only disclose information if legally required by authorized law enforcement or judicial authorities under Indian jurisdiction.
+                <strong>ZetaVex Tech Solutions does not sell, rent, trade, or monetize client data or project intellectual property to any third-party marketing broker or commercial entity.</strong> Your source code, technical specifications, and proprietary workflows remain strictly confidential.
               </p>
             </div>
 
-            {/* User Rights */}
+            {/* 06. User Rights */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">06.</span>
-                <span>Your Data Rights</span>
+                <span>Your Data Protection Rights</span>
               </h2>
               <p>
-                You have the right to request access to the personal data we hold about you, request corrections to inaccurate information, or ask for the deletion of your historical enquiry records from our database by contacting us.
+                Under applicable Indian and international data protection laws, you retain the right to:
               </p>
+              <ul className="list-disc pl-5 flex flex-col gap-2 mt-2 text-xs sm:text-sm">
+                <li>Request confirmation and a copy of personal information held in our records.</li>
+                <li>Request rectification of incomplete or inaccurate records.</li>
+                <li>Request permanent erasure of historical enquiry records and contact information.</li>
+                <li>Withdraw consent for marketing communications at any time.</li>
+              </ul>
             </div>
 
-            {/* Contact Information */}
+            {/* 07. Contact Information */}
             <div className="pt-6 border-t border-[#EBE8E1]">
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">07.</span>
-                <span>Contact Data Officer</span>
+                <span>Data Protection Officer &amp; Contact</span>
               </h2>
               <p className="mb-4">
-                If you have questions regarding this Privacy Policy or wish to exercise your data rights, please contact our leadership:
+                To exercise any of your data rights or discuss privacy compliance, reach our leadership directly:
               </p>
 
-              <div className="p-6 rounded-2xl bg-[#1C1917] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-6 rounded-3xl bg-[#1C1917] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <strong className="block text-base font-black">{COMPANY_INFO.name}</strong>
-                  <span className="text-xs text-[#A8A29E]">Attention: {COMPANY_INFO.founder} ({COMPANY_INFO.founderTitle})</span>
-                  <span className="text-xs text-[#DCD8CF] block mt-1">Location: {COMPANY_INFO.address}</span>
+                  <span className="text-xs text-[#A8A29E]">Leadership: {COMPANY_INFO.founder} ({COMPANY_INFO.founderTitle})</span>
+                  <span className="text-xs text-[#DCD8CF] block mt-1">MSME Reg: {COMPANY_INFO.udyamRegNo} · {COMPANY_INFO.address}</span>
+                  <span className="text-xs text-[#DCD8CF] block">Phone / WhatsApp: {COMPANY_INFO.phone}</span>
                 </div>
                 <a
-                  href={`mailto:${COMPANY_INFO.email}?subject=Privacy%20Policy%20Inquiry`}
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl transition-colors shrink-0"
+                  href={`mailto:${COMPANY_INFO.email}?subject=Privacy%20Data%20Inquiry`}
+                  className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl transition-colors shrink-0"
                 >
                   <Mail className="w-4 h-4" />
                   <span>{COMPANY_INFO.email}</span>

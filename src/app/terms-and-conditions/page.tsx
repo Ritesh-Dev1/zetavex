@@ -7,13 +7,13 @@ import { COMPANY_INFO } from '@/lib/constants';
 import { getBreadcrumbSchema, PRIMARY_KEYWORDS, SITE_URL } from '@/lib/seo';
 import JsonLd from '@/components/seo/JsonLd';
 import Link from 'next/link';
-import { FileText, ArrowLeft, ShieldCheck, Mail, CheckCircle2, Home, ChevronRight } from 'lucide-react';
+import { FileText, ShieldCheck, Mail, CheckCircle2, Home, ChevronRight, Code2, Scale, CreditCard, Award } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms & Conditions | ZetaVex Tech Solutions',
   description:
-    'Review the Terms and Conditions governing custom software development, code ownership, and client engagements with ZetaVex Tech Solutions.',
+    'Review the Terms and Conditions governing custom software engineering, IP code ownership, sprint milestones, and client agreements with ZetaVex Tech Solutions.',
   keywords: PRIMARY_KEYWORDS,
   alternates: {
     canonical: `${SITE_URL}/terms-and-conditions`,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Terms & Conditions | ZetaVex Tech Solutions',
     description:
-      'Review the Terms and Conditions governing custom software development, code ownership, and client engagements with ZetaVex Tech Solutions.',
+      'Review the Terms and Conditions governing custom software engineering, IP code ownership, sprint milestones, and client agreements with ZetaVex Tech Solutions.',
     url: `${SITE_URL}/terms-and-conditions`,
     type: 'article',
     images: [{ url: '/logo.png', width: 800, height: 800, alt: 'ZetaVex Terms and Conditions' }],
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Terms & Conditions | ZetaVex Tech Solutions',
     description:
-      'Review the Terms and Conditions governing custom software development, code ownership, and client engagements with ZetaVex Tech Solutions.',
+      'Review the Terms and Conditions governing custom software engineering, IP code ownership, sprint milestones, and client agreements with ZetaVex Tech Solutions.',
     images: ['/logo.png'],
   },
 };
@@ -64,7 +64,7 @@ export default function TermsAndConditionsPage() {
 
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#EBE8E1] text-[11px] font-bold text-[#FF5500] uppercase tracking-wider w-fit mb-3">
             <FileText className="w-3 h-3" />
-            <span>Client Service Agreement</span>
+            <span>Client Service Governance</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-[#0A0A0B] mb-4">
@@ -72,7 +72,7 @@ export default function TermsAndConditionsPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-[#57534E] leading-relaxed">
-            Last Updated: August 31, 2026 · Governing all commercial engagements with ZetaVex Tech Solutions
+            Effective Date: September 2026 · Governing all commercial contracts and software engineering with ZetaVex Tech Solutions
           </p>
         </div>
       </section>
@@ -81,101 +81,126 @@ export default function TermsAndConditionsPage() {
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-3xl p-6 sm:p-12 border border-[#EBE8E1] shadow-xs flex flex-col gap-10 text-[#44403C] text-sm sm:text-base leading-relaxed">
-            {/* 1. Agreement */}
+            
+            {/* 01. Agreement */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">01.</span>
-                <span>Agreement to Terms</span>
+                <span>Agreement to Terms &amp; Commercial Scope</span>
               </h2>
               <p>
-                By accessing this website, requesting project consultations, or entering into software development statements of work (SOW) with <strong>{COMPANY_INFO.name}</strong>, you agree to be bound by these Terms and Conditions. If you disagree with any portion of these terms, you should refrain from utilizing our services.
+                By visiting our website, submitting an architecture enquiry, or contracting custom engineering services with <strong>{COMPANY_INFO.name}</strong> (&ldquo;ZetaVex&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;), represented by Founder &amp; Proprietor <strong>{COMPANY_INFO.founder}</strong> (MSME Reg No. <strong className="font-mono text-[#0A0A0B]">{COMPANY_INFO.udyamRegNo}</strong>), you agree to be bound by these Terms and Conditions and any accompanying Statement of Work (SOW).
               </p>
             </div>
 
-            {/* 2. Services & Project Scope */}
+            {/* 02. Engineering Services & Milestone Governance */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">02.</span>
-                <span>Engineering Services &amp; Milestones</span>
+                <span>Engineering Deliverables &amp; Sprint Releases</span>
               </h2>
               <p>
-                {COMPANY_INFO.name} provides custom software engineering services, including full-stack web applications, SaaS platform development, mobile applications, cloud DevOps orchestration, and UI/UX product design across all modern tech stacks.
+                {COMPANY_INFO.name} delivers custom software engineering spanning full-stack web applications, SaaS platforms, mobile applications, cloud DevOps orchestration, and enterprise database integrations.
               </p>
-              <ul className="list-disc pl-5 flex flex-col gap-2 mt-2">
-                <li>Every commercial project is governed by a mutually agreed scope of work, technical architecture document, and sprint delivery schedule.</li>
-                <li>Any material changes to project scope during development may require an updated timeline and cost estimate.</li>
-              </ul>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
+                  <strong className="block text-[#0A0A0B] font-bold text-xs sm:text-sm mb-1">Architecture &amp; Roadmaps</strong>
+                  <p className="text-xs text-[#57534E]">
+                    Every project is defined by a signed Statement of Work, system architecture blueprint, and milestone sprint schedule.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EBE8E1]">
+                  <strong className="block text-[#0A0A0B] font-bold text-xs sm:text-sm mb-1">Change Order Management</strong>
+                  <p className="text-xs text-[#57534E]">
+                    Feature requests beyond agreed SOW specifications are scoped transparently with updated delivery timelines and resource estimates.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* 3. Intellectual Property */}
+            {/* 03. Intellectual Property & Code Ownership */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">03.</span>
-                <span>Intellectual Property &amp; Code Ownership</span>
+                <span>100% Client Code Ownership &amp; IP Rights</span>
               </h2>
               <p>
-                Upon complete receipt of contracted milestone payments, full ownership and intellectual property rights of custom bespoke code and project deliverables transfer unconditionally to the Client.
+                Upon complete clearance of contracted milestone payments, <strong>100% unconditional ownership and intellectual property rights</strong> of the custom bespoke source code, database architectures, user interface assets, and compiled binaries transfer permanently to the Client.
               </p>
-              <p className="mt-2">
-                Pre-existing proprietary frameworks, open-source libraries, and generic architectural boilerplates developed by {COMPANY_INFO.name} remain under their respective licenses with non-exclusive perpetual usage rights granted to the Client.
+              <p className="mt-2 text-xs sm:text-sm text-[#78716C]">
+                Open-source libraries (e.g. Next.js, React, Tailwind CSS) and generic utility boilerplates developed prior to the engagement remain subject to their respective open-source licenses, with a perpetual, royalty-free commercial grant to the Client.
               </p>
             </div>
 
-            {/* 4. Payment Terms */}
+            {/* 04. Invoicing, Payments & Taxes */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">04.</span>
-                <span>Payment Terms &amp; Invoicing</span>
+                <span>Payment Milestones &amp; Commercial Terms</span>
               </h2>
-              <p>
-                Invoices are issued in accordance with project milestones. Payment milestones are typically structured across Discovery, Sprint Releases, and Final Production Handover.
-              </p>
+              <ul className="list-disc pl-5 flex flex-col gap-2 mt-2">
+                <li>Commercial fees are invoiced based on agreed milestone completions (e.g. Sprint Kickoff, Core Architecture, User Acceptance Testing, and Production Handover).</li>
+                <li>Invoices are payable via direct Bank Wire (NEFT/RTGS/IMPS), UPI, or authorized international payment rails within the agreed billing window.</li>
+                <li>All statutory taxes, MSME provisions, and applicable GST compliance follow Indian taxation regulations.</li>
+              </ul>
             </div>
 
-            {/* 5. Warranties & Limitation of Liability */}
+            {/* 05. Warranty & Post-Launch Support */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">05.</span>
-                <span>Warranty &amp; Limitation of Liability</span>
+                <span>Warranty, Bug-Fixing &amp; Quality Guarantee</span>
               </h2>
               <p>
-                We warrant that deliverables will function in substantial conformance with agreed technical specifications during the contracted post-deployment warranty period.
+                We provide a standard **30-day post-launch warranty period** following final production deployment, during which any reproducible defects or bugs deviating from agreed specifications are resolved promptly at zero additional cost.
               </p>
               <p className="mt-2 text-xs sm:text-sm text-[#78716C]">
-                In no event shall {COMPANY_INFO.name} or its proprietor Vivek Chauhan be liable for indirect, incidental, consequential, or punitive damages resulting from third-party hosting outages, cyber incidents outside our control, or client modifications to production code.
+                Ongoing maintenance, continuous feature expansion, third-party API version migrations, and server scaling beyond warranty can be engaged under dedicated Monthly Retainer Agreements.
               </p>
             </div>
 
-            {/* 6. Governing Law */}
+            {/* 06. Limitation of Liability */}
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">06.</span>
-                <span>Governing Law &amp; Jurisdiction</span>
+                <span>Limitation of Liability</span>
               </h2>
-              <p>
-                These Terms and Conditions shall be governed by and construed in accordance with the laws of India. Any disputes arising in connection with these terms shall be subject to the exclusive jurisdiction of the competent courts in <strong>Rewari, Haryana, India</strong>.
+              <p className="text-xs sm:text-sm text-[#57534E]">
+                To the maximum extent permitted by law, ZetaVex Tech Solutions and its proprietor Vivek Chauhan shall not be liable for indirect, punitive, or consequential damages resulting from third-party cloud hosting downtime (e.g. AWS, Vercel, Supabase outages), unauthorized third-party modifications to production repositories, or client domain expirations.
               </p>
             </div>
 
-            {/* Contact */}
-            <div className="pt-6 border-t border-[#EBE8E1]">
+            {/* 07. Governing Law & Jurisdiction */}
+            <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
                 <span className="text-[#FF5500]">07.</span>
-                <span>Contact Legal Governance</span>
+                <span>Governing Law &amp; Legal Jurisdiction</span>
+              </h2>
+              <p>
+                These Terms and Conditions and all commercial contracts are governed by and construed in accordance with the substantive laws of the <strong>Republic of India</strong>. Any legal dispute or claim arising hereunder shall be subject to the exclusive jurisdiction of the competent courts in <strong>Rewari, Haryana, India</strong>.
+              </p>
+            </div>
+
+            {/* 08. Contact & Legal Governance */}
+            <div className="pt-6 border-t border-[#EBE8E1]">
+              <h2 className="text-xl sm:text-2xl font-black text-[#0A0A0B] mb-3 flex items-center gap-2">
+                <span className="text-[#FF5500]">08.</span>
+                <span>Legal Inquiries &amp; Governance</span>
               </h2>
               <p className="mb-4">
-                For questions regarding project agreements or terms, please contact:
+                For contract inquiries, master service agreements, or vendor registration:
               </p>
 
-              <div className="p-6 rounded-2xl bg-[#1C1917] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-6 rounded-3xl bg-[#1C1917] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <strong className="block text-base font-black">{COMPANY_INFO.name}</strong>
-                  <span className="text-xs text-[#A8A29E]">Founder &amp; Proprietor: {COMPANY_INFO.founder}</span>
+                  <span className="text-xs text-[#A8A29E]">Proprietor: {COMPANY_INFO.founder} ({COMPANY_INFO.founderTitle})</span>
                   <span className="text-xs text-[#DCD8CF] block mt-1">MSME Udyam: {COMPANY_INFO.udyamRegNo} · {COMPANY_INFO.address}</span>
+                  <span className="text-xs text-[#DCD8CF] block">Direct WhatsApp: {COMPANY_INFO.phone}</span>
                 </div>
                 <a
-                  href={`mailto:${COMPANY_INFO.email}?subject=Terms%20and%20Conditions%20Inquiry`}
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl transition-colors shrink-0"
+                  href={`mailto:${COMPANY_INFO.email}?subject=Contract%20Terms%20Inquiry`}
+                  className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-[#FF5500] hover:bg-[#ff6a20] rounded-xl transition-colors shrink-0"
                 >
                   <Mail className="w-4 h-4" />
                   <span>{COMPANY_INFO.email}</span>
