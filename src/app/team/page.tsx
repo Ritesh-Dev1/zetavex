@@ -104,8 +104,8 @@ export default async function TeamPage() {
         </div>
       </section>
 
-      {/* Team Cards Section (3 on desktop, 2 on mobile) */}
-      <TeamSection initialTeam={team} />
+      {/* Full Leadership Team Directory Grid */}
+      <TeamSection initialTeam={team} isSlider={false} />
 
       {/* Philosophy & Credentials Banner */}
       <section className="py-16 bg-[#F4F1EA]/60 border-t border-[#EBE8E1]">

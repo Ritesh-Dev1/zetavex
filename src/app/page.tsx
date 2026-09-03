@@ -41,12 +41,12 @@ export default async function HomePage() {
       {/* Sticky Desktop & Mobile Header */}
       <Header />
 
-      {/* Main Marketing Sections (Limited to 4 cards on home with View More triggers) */}
+      {/* Main Marketing Sections (Interactive Touch Sliders with Full Catalog Routing) */}
       <HeroSection />
-      <ServicesSection initialServices={services} limit={4} />
-      <ProjectsSection initialProjects={projects} limit={4} />
+      <ServicesSection initialServices={services} limit={6} />
+      <ProjectsSection initialProjects={projects} />
       <TeamSection initialTeam={team} />
-      <ReviewsSection initialReviews={reviews} limit={4} />
+      <ReviewsSection initialReviews={reviews} />
       <ContactSection />
 
       {/* Global Footer */}

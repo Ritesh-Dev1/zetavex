@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { COMPANY_INFO, INITIAL_SERVICES } from '@/lib/constants';
+import { trackEvent } from '@/lib/gtag';
 import { 
   Sparkles, 
   Send, 
@@ -68,6 +69,11 @@ export default function ContactSection() {
       }
 
       setSuccessMessage(data.message || 'Enquiry submitted successfully!');
+      trackEvent({
+        action: 'generate_lead',
+        category: 'Contact',
+        label: formData.service_requested,
+      });
       setFormData({
         name: '',
         email: '',

@@ -10,6 +10,7 @@ import {
   getGoogleSiteVerification
 } from '@/lib/seo';
 import JsonLd from '@/components/seo/JsonLd';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -106,6 +107,7 @@ export default function RootLayout({
         <JsonLd data={[orgSchema, webSiteSchema]} />
       </head>
       <body className="min-h-screen bg-[#FAF8F5] text-[#0A0A0B] antialiased selection:bg-[#FF5500] selection:text-white overflow-x-hidden w-full max-w-full">
+        <GoogleAnalytics />
         {children}
       </body>
     </html>

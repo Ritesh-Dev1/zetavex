@@ -104,8 +104,8 @@ export default async function ProjectsPage() {
         </div>
       </section>
 
-      {/* Projects Grid (3 cards desktop, 2 cards mobile) */}
-      <ProjectsSection initialProjects={projects} />
+      {/* Full Projects Catalog Grid */}
+      <ProjectsSection initialProjects={projects} isSlider={false} />
 
       {/* Contact & Enquiry */}
       <ContactSection />
