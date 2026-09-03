@@ -1,22 +1,37 @@
 import { Service, Project, TeamMember, ClientReview } from './types';
 
+const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'ZetaVex Tech Solutions';
+const companyShortName = process.env.NEXT_PUBLIC_COMPANY_SHORT_NAME || 'ZetaVex';
+const founder = process.env.NEXT_PUBLIC_FOUNDER_NAME || 'Vivek Chauhan';
+const founderTitle = process.env.NEXT_PUBLIC_FOUNDER_TITLE || 'Founder & Proprietor';
+const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+91 9721176040';
+const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+919721176040';
+const cleanWhatsapp = whatsappNumber.replace(/[^0-9]/g, '') || '919721176040';
+const cleanPhone = phone.replace(/[^0-9+]/g, '') || '+919721176040';
+const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'zetavextech@outlook.com';
+const address = process.env.NEXT_PUBLIC_COMPANY_ADDRESS || 'Rewari, Haryana, India';
+const udyamRegNo = process.env.NEXT_PUBLIC_UDYAM_REG_NO || 'UDYAM-HR-15-0041364';
+const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://www.instagram.com/zetavextech';
+const linkedinUrl = process.env.NEXT_PUBLIC_LINKEDIN_URL || 'https://www.linkedin.com/company/zetavex-tech-solutions';
+const heroValueProp = process.env.NEXT_PUBLIC_HERO_VALUE_PROP || 'Transforming ambitious ideas into scalable digital solutions for global enterprises.';
+
 export const COMPANY_INFO = {
-  name: 'ZetaVex Tech Solutions',
-  shortName: 'ZetaVex',
+  name: companyName,
+  shortName: companyShortName,
   tagline: 'Innovate · Develop · Deliver',
   slogan: 'Your Vision, Our Solution',
-  founder: 'Vivek Chauhan',
-  founderTitle: 'Founder & Proprietor',
-  phone: '+91 9721176040',
-  whatsappNumber: '+919721176040',
-  whatsappUrl: 'https://wa.me/919721176040?text=Hi%20ZetaVex%20Tech%20Team%2C%20I%20would%20like%20to%20get%20a%20quote%20for%20a%20project.',
-  callUrl: 'tel:+919721176040',
-  email: 'zetavextech@outlook.com',
-  address: 'Rewari, Haryana, India',
-  udyamRegNo: 'UDYAM-HR-15-0041364',
-  instagramUrl: 'https://www.instagram.com/zetavextech',
-  linkedinUrl: 'https://www.linkedin.com/company/zetavex-tech-solutions',
-  heroValueProp: 'Transforming ambitious ideas into scalable digital solutions for global enterprises.',
+  founder: founder,
+  founderTitle: founderTitle,
+  phone: phone,
+  whatsappNumber: whatsappNumber,
+  whatsappUrl: `https://wa.me/${cleanWhatsapp}?text=Hi%20${encodeURIComponent(companyShortName)}%20Tech%20Team%2C%20I%20would%20like%20to%20get%20a%20quote%20for%20a%20project.`,
+  callUrl: `tel:${cleanPhone.startsWith('+') ? cleanPhone : '+' + cleanPhone}`,
+  email: email,
+  address: address,
+  udyamRegNo: udyamRegNo,
+  instagramUrl: instagramUrl,
+  linkedinUrl: linkedinUrl,
+  heroValueProp: heroValueProp,
 };
 
 export const INITIAL_SERVICES: Service[] = [
