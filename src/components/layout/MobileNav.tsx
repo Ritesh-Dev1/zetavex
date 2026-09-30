@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layers, Briefcase, Users, Mail } from 'lucide-react';
+import { Home, Layers, Cpu, Briefcase, Users, Mail } from 'lucide-react';
 
 export default function MobileNav() {
   const pathname = usePathname();
@@ -11,9 +11,9 @@ export default function MobileNav() {
   const navItems = [
     { id: 'home', label: 'Home', href: '/', icon: Home },
     { id: 'services', label: 'Services', href: '/services', icon: Layers },
+    { id: 'products', label: 'Products', href: '/product', icon: Cpu },
     { id: 'projects', label: 'Projects', href: '/projects', icon: Briefcase },
     { id: 'team', label: 'Team', href: '/team', icon: Users },
-    { id: 'contact', label: 'Contact', href: '/#contact', icon: Mail },
   ];
 
   return (

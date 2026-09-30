@@ -36,6 +36,26 @@ export interface Project {
   updated_at?: string;
 }
 
+export interface Product {
+  id: string;
+  title: string;
+  slug: string;
+  tagline: string;
+  category: string;
+  description: string;
+  badge?: string;
+  image_url: string;
+  demo_url?: string;
+  docs_url?: string;
+  features: string[];
+  tech_tags: string[];
+  pricing_model: string;
+  is_featured: boolean;
+  status: 'live' | 'beta' | 'in_development';
+  sort_order: number;
+  created_at?: string;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
